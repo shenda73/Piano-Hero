@@ -1,5 +1,12 @@
-// Piano Hero
-// Anthony Venen & Da Shen @ March 2016
+/*  
+ *   Piano Hero
+ *  Anthony Venen & Da Shen @ UIUC March 2016
+ */
+
+/*
+ * AtMega2560 Datasheet
+ * http://www.atmel.com/images/atmel-2549-8-bit-avr-microcontroller-atmega640-1280-1281-2560-2561_datasheet.pdf
+ */
 
 //Adjust this value to change the sensitivity of the piezos
 const int PIEZO_THRESHOLD = 5;
@@ -51,14 +58,17 @@ const int input_pins[] = {PIEZO_OCT1_DATA_IN,PIEZO_OCT2_DATA_IN,
 const int CLK_8MHZ = 44;
 const int CLK_1MHZ = 10;
 
-
+// Initialize 8MHz and 1Mhz Clock Signal
 void CLK_init() {
   // Reference:
   // https://www.arduino.cc/en/Tutorial/SecretsOfArduinoPWM
+  // http://playground.arduino.cc/Main/TimerPWMCheatsheet
+  // http://blog.oscarliang.net/arduino-timer-and-interrupt-tutorial/
+  // http://sphinx.mythic-beasts.com/~markt/ATmega-timers.html
+  // http://forum.arduino.cc/index.php?topic=62964.0
   pinMode(CLK_8MHZ, OUTPUT);
   TCCR5A = _BV(COM5A1) | _BV(WGM51) | _BV(WGM50);
   // set the prescale factor to 1
-//  TCCR5B = (TCCR5B & 0b11111000) | 0x01; 
   TCCR5B = _BV(CS50);
   // set duty cycle to 50%
   OCR5AH = 0;
