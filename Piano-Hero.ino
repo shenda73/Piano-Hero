@@ -22,9 +22,16 @@ const int PIEZO_OCT2_DATA_COMPARE = 33;
 const int PIEZO_OCT3_DATA_IN = 34;
 const int PIEZO_OCT3_DATA_COMPARE = 35;
 
+const int output_pins[] = {LED_OCT1_DATA1,LED_OCT1_DATA2,
+    LED_OCT2_DATA1,LED_OCT2_DATA1,LED_OCT3_DATA2,PIEZO_C,PIEZO_B,
+    PIEZO_A, PIEZO_OCT1_DATA_COMPARE, PIEZO_OCT2_DATA_COMPARE,
+    PIEZO_OCT3_DATA_COMPARE};
+
+const int input_pins[] = {PIEZO_OCT1_DATA_IN,PIEZO_OCT2_DATA_IN,
+    PIEZO_OCT3_DATA_IN};
 
 
-/* References:
+/* Clock References:
  * http://sphinx.mythic-beasts.com/~markt/ATmega-timers.html
  * 
  * Pins 4 and 13: controlled by timer0
@@ -44,22 +51,16 @@ const int PIEZO_OCT3_DATA_COMPARE = 35;
 const int CLK_8MHZ = 44;
 const int CLK_1MHZ = 10;
 
-// array of output pins
-const int output_pins[] = {LED_OCT1_DATA1,LED_OCT1_DATA2,
-    LED_OCT2_DATA1,LED_OCT2_DATA1,LED_OCT3_DATA2,PIEZO_C,PIEZO_B,
-    PIEZO_A, PIEZO_OCT1_DATA_COMPARE, PIEZO_OCT2_DATA_COMPARE,
-    PIEZO_OCT3_DATA_COMPARE};
 
-// array of input pins
-const int input_pins[] = {PIEZO_OCT1_DATA_IN,PIEZO_OCT2_DATA_IN,
-    PIEZO_OCT3_DATA_IN};
-
-void generate_clocks() {
+void CLK_init() {
+  // Reference:
+  // https://www.arduino.cc/en/Tutorial/SecretsOfArduinoPWM
   pinMode(CLK_8MHZ, OUTPUT);
   TCCR5A = _BV(COM5A1) | _BV(WGM51) | _BV(WGM50);
   // set the prescale factor to 1
 //  TCCR5B = (TCCR5B & 0b11111000) | 0x01; 
   TCCR5B = _BV(CS50);
+  // set duty cycle to 50%
   OCR5AH = 0;
   OCR5AL = 255;
   
@@ -71,6 +72,12 @@ void generate_clocks() {
   
 }
 
+
+
+
+
+
+
 void setup() {
   // assign output pins
   for(int i = 0; i < sizeof(output_pins);i++){
@@ -80,6 +87,8 @@ void setup() {
   for(int i = 0; i < sizeof(input_pins);i++){
     pinMode(input_pins[i], INPUT);
   }
+  CLK_init();
+  
 }
 
 void loop() {
