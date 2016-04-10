@@ -2,106 +2,167 @@
  *   Piano Hero
  *  Anthony Venen & Da Shen @ UIUC March 2016
  */
-
+#define DEBUG_MODE 0
 /*
  * AtMega2560 Datasheet
  * http://www.atmel.com/images/atmel-2549-8-bit-avr-microcontroller-atmega640-1280-1281-2560-2561_datasheet.pdf
+ * https://arduino-info.wikispaces.com/MegaQuickRef
  */
+
 
 //Adjust this value to change the sensitivity of the piezos
 const int PIEZO_THRESHOLD = 5;
 
 // Pin Assignment
 // LED Array - LEDs
-const int LED_OCT1_DATA1 = 22;
-const int LED_OCT1_DATA2 = 23;
-const int LED_OCT2_DATA1 = 24;
-const int LED_OCT3_DATA1 = 25;
-const int LED_OCT3_DATA2 = 26;
+const int LED_DATA1 = 22;
+const int LED_DATA2 = 23;
+const int LED_DATA3 = 24;
+const int LED_DATA4 = 25;
+const int LED_DATA5 = 26;
 
 const int PIEZO_C = 27;
 const int PIEZO_B = 28;
 const int PIEZO_A = 29;
-const int PIEZO_OCT1_DATA_IN = 30;
-const int PIEZO_OCT1_DATA_COMPARE = 31;
-const int PIEZO_OCT2_DATA_IN = 32;
-const int PIEZO_OCT2_DATA_COMPARE = 33;
-const int PIEZO_OCT3_DATA_IN = 34;
-const int PIEZO_OCT3_DATA_COMPARE = 35;
+const int PIEZO_DATA_IN1 = 30;
+const int PIEZO_DATA_IN2 = 31;
+const int PIEZO_DATA_IN3 = 32;
+const int PIEZO_DATA_IN4 = 33;
+const int PIEZO_DATA_IN5 = 34;
 
-const int output_pins[] = {LED_OCT1_DATA1,LED_OCT1_DATA2,
-    LED_OCT2_DATA1,LED_OCT2_DATA1,LED_OCT3_DATA2,PIEZO_C,PIEZO_B,
-    PIEZO_A, PIEZO_OCT1_DATA_COMPARE, PIEZO_OCT2_DATA_COMPARE,
-    PIEZO_OCT3_DATA_COMPARE};
+const int PIEZO_DATA_COMPARE1 = 35;
+const int PIEZO_DATA_COMPARE2 = 36;
+const int PIEZO_DATA_COMPARE3 = 37;
+const int PIEZO_DATA_COMPARE4 = 38;
+const int PIEZO_DATA_COMPARE5 = 39;
 
-const int input_pins[] = {PIEZO_OCT1_DATA_IN,PIEZO_OCT2_DATA_IN,
-    PIEZO_OCT3_DATA_IN};
+static int SLOW_SRCLK = 40;
+static int SLOW_RCLK = 41;
+static int FAST_SRCLK = 42;
+static int FAST_RCLK = 43;
+
+const int output_pins[] = {LED_DATA1,LED_DATA2,LED_DATA3,
+LED_DATA4,LED_DATA5,PIEZO_C,PIEZO_B,PIEZO_A,PIEZO_DATA_COMPARE1,
+PIEZO_DATA_COMPARE2,PIEZO_DATA_COMPARE3,PIEZO_DATA_COMPARE4,
+PIEZO_DATA_COMPARE5,SLOW_SRCLK,SLOW_RCLK,FAST_SRCLK,FAST_RCLK};
+
+const int input_pins[] = {PIEZO_DATA_IN1,PIEZO_DATA_IN2,
+    PIEZO_DATA_IN3,PIEZO_DATA_IN4,PIEZO_DATA_IN5};
 
 
-/* Clock References:
- * http://sphinx.mythic-beasts.com/~markt/ATmega-timers.html
+/*
+ * ================ HELPER FUNCTIONS ================ 
  * 
- * Pins 4 and 13: controlled by timer0
- * Pins 11 and 12: controlled by timer1
- * Pins 9 and10: controlled by timer2
- * Pin 2, 3 and 5: controlled by timer 3
- * Pin 6, 7 and 8: controlled by timer 4
- * Pin 46, 45 and 44:: controlled by timer 5
- * 
- *  Note that
- * Timer/Counter0, Timer/Counter1, Timer/Counter3, Timer/Counter4 
- * and Timer/Counter5 share the same prescaler
- * and a reset of this prescaler will affect all timers.
-*/
+ */
+ 
 
-// Clock Signals
-const int CLK_8MHZ = 44;
-const int CLK_1MHZ = 10;
+void light_up_LED_column(int col_num) {
+   
+}
 
-// Initialize 8MHz and 1Mhz Clock Signal
-void CLK_init() {
-  // Reference:
-  // https://www.arduino.cc/en/Tutorial/SecretsOfArduinoPWM
-  // http://playground.arduino.cc/Main/TimerPWMCheatsheet
-  // http://blog.oscarliang.net/arduino-timer-and-interrupt-tutorial/
-  // http://sphinx.mythic-beasts.com/~markt/ATmega-timers.html
-  // http://forum.arduino.cc/index.php?topic=62964.0
-  pinMode(CLK_8MHZ, OUTPUT);
-  TCCR5A = _BV(COM5A1) | _BV(WGM51) | _BV(WGM50);
-  // set the prescale factor to 1
-  TCCR5B = _BV(CS50);
-  // set duty cycle to 50%
-  OCR5AH = 0;
-  OCR5AL = 255;
-  
-  pinMode(CLK_1MHZ, OUTPUT);
-  TCCR2A = _BV(COM2A1) | _BV(WGM21) | _BV(WGM20);
-  TCCR2B = _BV(CS20);
-  // set duty cycle to 50%
-  OCR2A = 127;
+
+
+void piezo_loop() {
   
 }
 
 
 
+/*
+ * =============== MAIN FUNCTION LOOP ==============
+ */
 
+static int slow_clk_freq = 1; // Hz
+static int fast_clk_freq = 8; // Hz
 
+// this function simulates a full cycle of the slow clock
+// note: columns_to_light, e.g. 10000110, which lights up 1st,6th,
+// and 7th lights
+void clk_function(float slow_freq, char* columns_to_light,int LED_data_pin){
+  int delay_time = 1000/slow_freq/2/8;
+  boolean turn_off_light = false;
+  
+  // slow clock - goes up
+  digitalWrite(SLOW_SRCLK, HIGH);
+  digitalWrite(SLOW_RCLK, LOW);
 
+  //fast clock - up/down for 4 times
+  int i = 0;
+  for(i = 0; i < 4; i++) {
+    if(columns_to_light[7-i] == '1') {
+      turn_off_light = true;
+    }
+    if(turn_off_light) {
+//      delay(3);
+      digitalWrite(LED_data_pin,HIGH);
+//      delay(3);
+    }
+    digitalWrite(FAST_SRCLK, HIGH);
+    digitalWrite(FAST_RCLK, LOW);
+    delay(delay_time);
+    digitalWrite(FAST_SRCLK, LOW);
+    digitalWrite(FAST_RCLK, HIGH);
+    if(turn_off_light) {
+      turn_off_light = false;
+      digitalWrite(LED_data_pin,LOW);
+    }
+    delay(delay_time);
+  }
+
+  // slow clock - goes down
+  digitalWrite(SLOW_SRCLK, LOW);
+  digitalWrite(SLOW_RCLK, HIGH);
+
+  //fast clock - up/down for 4 times
+  for(; i < 8; i++) {
+//    Serial.println(columns_to_light[7-i]);
+    if(columns_to_light[7-i] == '1') {
+      turn_off_light = true;
+    }
+    if(turn_off_light) {
+      digitalWrite(LED_data_pin,HIGH);
+    }
+    digitalWrite(FAST_SRCLK, HIGH);
+    digitalWrite(FAST_RCLK, LOW);
+    delay(delay_time);
+    digitalWrite(FAST_SRCLK, LOW);
+    digitalWrite(FAST_RCLK, HIGH);
+    if(turn_off_light) {
+      turn_off_light = false;
+      digitalWrite(LED_data_pin,LOW);
+    }
+    delay(delay_time);
+  }
+  
+}
+
+void set_column_light_byte(byte *target, int8_t num) {
+  if (num <= 8 and num >= 1) {
+    (*target) = *target & (0x01 << num);
+  }
+}
 
 void setup() {
-  // assign output pins
-  for(int i = 0; i < sizeof(output_pins);i++){
+  if(DEBUG_MODE){
+    Serial.begin(9600);
+  }
+//  Serial.print(sizeof(output_pins)/sizeof(int));
+  int8_t num_outputs = sizeof(output_pins)/sizeof(int);
+  int8_t num_inputs = sizeof(input_pins)/sizeof(int);
+  // init output pins
+  for(int i = 0; i < num_outputs;i++){
     pinMode(output_pins[i], OUTPUT);
   }
-  // assign input pins
-  for(int i = 0; i < sizeof(input_pins);i++){
+  // init input pins
+  for(int i = 0; i < num_inputs;i++){
     pinMode(input_pins[i], INPUT);
   }
-  CLK_init();
-  
+
+  pinMode(13,OUTPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  analogWrite(7,10);
+  char data[] = "00000001";
+  clk_function(1,data,LED_DATA1);
+//  analogWrite(LED_DATA1,100);
 }
