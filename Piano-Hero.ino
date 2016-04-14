@@ -18,31 +18,31 @@ const int PIEZO_THRESHOLD = 5;
 
 // Pin Assignment
 // LED Array - LEDs
-const int LED_DATA1 = 22;
-const int LED_DATA2 = 23;
-const int LED_DATA3 = 24;
-const int LED_DATA4 = 25;
-const int LED_DATA5 = 26;
+const int8_t LED_DATA1 = 22;
+const int8_t LED_DATA2 = 23;
+const int8_t LED_DATA3 = 24;
+const int8_t LED_DATA4 = 25;
+const int8_t LED_DATA5 = 26;
 
-const int PIEZO_C = 27;
-const int PIEZO_B = 28;
-const int PIEZO_A = 29;
-const int PIEZO_DATA_IN1 = A15;
-const int PIEZO_DATA_IN2 = A14;
-const int PIEZO_DATA_IN3 = A13;
-const int PIEZO_DATA_IN4 = A12;
-const int PIEZO_DATA_IN5 = A11;
+const int8_t PIEZO_C = 27;
+const int8_t PIEZO_B = 28;
+const int8_t PIEZO_A = 29;
+const int8_t PIEZO_DATA_IN1 = A15;
+const int8_t PIEZO_DATA_IN2 = A14;
+const int8_t PIEZO_DATA_IN3 = A13;
+const int8_t PIEZO_DATA_IN4 = A12;
+const int8_t PIEZO_DATA_IN5 = A11;
 
-const int PIEZO_DATA_COMPARE1 = 30;
-const int PIEZO_DATA_COMPARE2 = 31;
-const int PIEZO_DATA_COMPARE3 = 32;
-const int PIEZO_DATA_COMPARE4 = 33;
-const int PIEZO_DATA_COMPARE5 = 34;
+const int8_t PIEZO_DATA_COMPARE1 = 30;
+const int8_t PIEZO_DATA_COMPARE2 = 31;
+const int8_t PIEZO_DATA_COMPARE3 = 32;
+const int8_t PIEZO_DATA_COMPARE4 = 33;
+const int8_t PIEZO_DATA_COMPARE5 = 34;
 
-static int SLOW_SRCLK = 40;
-static int SLOW_RCLK = 41;
-static int FAST_SRCLK = 42;
-static int FAST_RCLK = 43;
+static int8_t SLOW_SRCLK = 40;
+static int8_t SLOW_RCLK = 41;
+static int8_t FAST_SRCLK = 42;
+static int8_t FAST_RCLK = 43;
 
 const int8_t output_pins[] = {LED_DATA1,LED_DATA2,LED_DATA3,
 LED_DATA4,LED_DATA5,PIEZO_C,PIEZO_B,PIEZO_A,PIEZO_DATA_COMPARE1,
@@ -193,10 +193,13 @@ void setup() {
   }
 
 //  pinMode(13,OUTPUT);
+  Serial1.begin(57600);
 }
 
 void loop() {
 //  char data[] = "00000001";
 //  LED_array_clk_gen(1,data,LED_DATA1);
+  Serial1.write("1khkjhjkhjkh");
+  delay(1000);
   
 }
