@@ -6,6 +6,8 @@
 #include <PinChangeInt.h>
  
 #define DEBUG_MODE 1
+
+#define BLEmini Serial1
 /*
  * 
  * AtMega2560 Datasheet
@@ -60,6 +62,29 @@ const int8_t input_pins[] = {PIEZO_DATA_IN1,PIEZO_DATA_IN2,
 static int slow_clk_freq = 1; // Hz
 static int fast_clk_freq = 8; // Hz
 
+// BT state
+// 0 - wait for init, 1 - wait for value, 
+static int8_t BT_state = 0; 
+volatile static byte incomingByte = 0;
+static int count = 0;
+
+// Bluetooth Protocol
+//Arduino -> iPhone
+#define RESP_ACKNOWLEDGE 0xE5
+#define RESP_DECLINE 0x1A
+#define RESP_TEMP_ADJUST_FAST 0xA1
+#define RESP_TEMP_ADJUST_DOWN 0xA0
+//Arduino <- iPhone
+#define FUNC_START_PLAYING 0x97
+#define FUNC_STOP_PLAYING 0x98
+#define FUNC_START_OF_DATA_TRANSMISSION 0x99
+#define FUNC_END_OF_DATA_TRANSMISSION 0x9A
+#define FUNC_CLR_SCREEN 0x99
+#define FUNC_TEMP_ADJUST_FAST 0x91
+#define FUNC_TEMP_ADJUST_DOWN 0x90
+
+
+
 
 // -------- test ---------
 //triggered values
@@ -72,12 +97,20 @@ static int current_column = 0;
  * 
  */
 
-void clk_gen_test() {
-//  pinMode(9,OUTPUT);
-//  pinMode(10,OUTPUT);
-//  TCCR2A = ;
-//  TCCR2B = ;
-  return;
+// adapted from:
+// http://ericjknapp.com/blog/2014/04/13/midi-notes/
+const char * noteForMidiNumber(int midiNumber) {
+  const char * const noteArraySharps[] = {"", "", "", "", "", "", "", "", "", "", "", "",
+    "C0", "C#0", "D0", "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0",
+    "C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1", "G#1", "A1", "A#1", "B1",
+    "C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
+    "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+    "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+    "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+    "C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
+    "C7", "C#7", "D7", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7",
+    "C8", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
+  return noteArraySharps[midiNumber];
 }
 
 void light_up_LED_column(int col_num) {
@@ -111,73 +144,7 @@ void piezo_loop(const int8_t piezo_data_pins[]) {
 
 
 
-// TODO: convert this to millis() based background 
-// reference: 
-// https://www.baldengineer.com/millis-tutorial.html
 
-// this function simulates a full cycle of the slow clock
-// note: columns_to_light, e.g. 10000110, which lights up 1st,6th,
-// and 7th lights
-// Example:
-//  char data[] = "00000001";
-//  LED_array_clk_gen(1,data,LED_DATA1);
-void LED_array_clk_gen(float slow_freq, char* columns_to_light,int LED_data_pin){
-  int delay_time = 1000/slow_freq/2/8;
-  boolean turn_off_light = false;
-
-  current_column = 0;
-  // slow clock - goes up
-  digitalWrite(SLOW_SRCLK, HIGH);
-  digitalWrite(SLOW_RCLK, LOW);
-
-  //fast clock - up/down for 4 times
-  int i = 0;
-  for(i = 0; i < 4; i++) {
-    current_column++;
-    if(columns_to_light[7-i] == '1') {
-      turn_off_light = true;
-    }
-    if(turn_off_light) {
-      digitalWrite(LED_data_pin,HIGH);
-    }
-    digitalWrite(FAST_SRCLK, HIGH);
-    digitalWrite(FAST_RCLK, LOW);
-    delay(delay_time);
-    digitalWrite(FAST_SRCLK, LOW);
-    digitalWrite(FAST_RCLK, HIGH);
-    if(turn_off_light) {
-      turn_off_light = false;
-      digitalWrite(LED_data_pin,LOW);
-    }
-    delay(delay_time);
-  }
-
-  // slow clock - goes down
-  digitalWrite(SLOW_SRCLK, LOW);
-  digitalWrite(SLOW_RCLK, HIGH);
-
-  //fast clock - up/down for 4 times
-  for(; i < 8; i++) {
-    current_column++;
-    if(columns_to_light[7-i] == '1') {
-      turn_off_light = true;
-    }
-    if(turn_off_light) {
-      digitalWrite(LED_data_pin,HIGH);
-    }
-    digitalWrite(FAST_SRCLK, HIGH);
-    digitalWrite(FAST_RCLK, LOW);
-    delay(delay_time);
-    digitalWrite(FAST_SRCLK, LOW);
-    digitalWrite(FAST_RCLK, HIGH);
-    if(turn_off_light) {
-      turn_off_light = false;
-      digitalWrite(LED_data_pin,LOW);
-    }
-    delay(delay_time);
-  }
-  
-}
 
 
 
@@ -212,8 +179,7 @@ void setup() {
     attachPinChangeInterrupt(input_pins[i],piezo_interrupt_handler,RISING);
   }
 
-//  pinMode(13,OUTPUT);
-  Serial1.begin(57600);
+  BLEmini.begin(57600);
 
   // CLR bit shifter
   if (clear_bit_shifter) {
@@ -224,40 +190,169 @@ void setup() {
   
 }
 
-unsigned char buf[16] = {0};
-unsigned char len = 0;
+
+// CLK state
+// 0 - stopped
+// 1 - SLOW_SRCLK up, SLOW_RCLK down, FAST_SRCLK up, FAST_RCLK down
+// 2 - FAST_SRCLK down, FAST_RCLK up
+// 3 - FAST_SRCLK up, FAST_RCLK down 
+// 4 - FAST_SRCLK down, FAST_RCLK up
+// 5 - FAST_SRCLK up, FAST_RCLK down 
+// 6 - FAST_SRCLK down, FAST_RCLK up
+// 7 - FAST_SRCLK up, FAST_RCLK down 
+// 8 - FAST_SRCLK down, FAST_RCLK up, SLOW_SRCLK down, SLOW_RCLK up
+// 9 - FAST_SRCLK up, FAST_RCLK down
+// 10 - FAST_SRCLK down, FAST_RCLK up
+// 11 - FAST_SRCLK up, FAST_RCLK down
+// 12 - FAST_SRCLK down, FAST_RCLK up
+// 13 - FAST_SRCLK up, FAST_RCLK down
+// 14 - FAST_SRCLK down, FAST_RCLK up
+// 15 - FAST_SRCLK up, FAST_RCLK down
+// 16 - FAST_SRCLK down, FAST_RCLK up
+//  --- set CLK frequency here ---
+static int slow_freq = 1; // the slow clock runs at 1Hz
+static unsigned int CLK_state = 0;
+static int delay_time = 1000/slow_freq/2/8;
+static bool start_clk_flag = false;
+unsigned long previousMillis = 0;
+volatile char LED_data[5] = {0b01000001,0b00000000,0b00000000,0b00000000,0b00000000};
+bool dim_light[5] = {false};
+const int8_t LED_data_pin[5] = {LED_DATA1,LED_DATA2,LED_DATA3,LED_DATA4,LED_DATA5};
+
+void CLK_GEN_helper() {
+  // clock logic
+  if (CLK_state > 16) return;
+  if (CLK_state == 1){
+    digitalWrite(SLOW_SRCLK, HIGH);
+    digitalWrite(SLOW_RCLK, LOW);
+  } else if (CLK_state == 8){
+    digitalWrite(SLOW_SRCLK, LOW);
+    digitalWrite(SLOW_RCLK, HIGH);
+  }
+  if(CLK_state % 2 != 0){
+    digitalWrite(FAST_SRCLK, HIGH);
+    digitalWrite(FAST_RCLK, LOW);
+    if(start_clk_flag){
+      for(int i = 0; i < 5; i++){
+        if((LED_data[i] >> (7-(CLK_state-1)/2)) & (0x1) == 1){
+          Serial.print(CLK_state);
+          Serial.print("  light up!! ");
+          Serial.println(LED_data_pin[i]);
+          dim_light[i] = true;
+          digitalWrite(LED_data_pin[i],HIGH);
+        }
+      }
+    }
+  } else {
+    digitalWrite(FAST_SRCLK, LOW);
+    digitalWrite(FAST_RCLK, HIGH); 
+    if(start_clk_flag){
+      for(int i = 0; i < 5; i++){
+        if(dim_light[i]){
+          Serial.print(CLK_state);
+          Serial.print("  dim down!! ");
+          Serial.println(LED_data_pin[i]);
+          dim_light[i] = false;
+          digitalWrite(LED_data_pin[i],LOW);
+        }
+      } 
+    }
+  }
+  
+  previousMillis = millis();
+  CLK_state *= 100;
+}
+
+// Synchronous Clock Generator
+void CLK_GEN() {
+  if (CLK_state == 0){
+    if(start_clk_flag){
+        CLK_state = 1;
+    }
+  } else if (CLK_state > 16) {
+    unsigned long currentMillis = millis();
+    if(currentMillis - previousMillis >= delay_time){
+      CLK_state = CLK_state/100 + 1;
+      if(CLK_state == 17) CLK_state = 1;
+    }
+  } else {
+    CLK_GEN_helper();
+  }
+}
+
+void clear_screen(bool clearScr) {
+  if(clearScr){
+    digitalWrite(SLOW_SRCLR,LOW);
+    digitalWrite(FAST_SRCLR,LOW);  
+  } else {
+    digitalWrite(SLOW_SRCLR,HIGH);
+    digitalWrite(FAST_SRCLR,HIGH);
+  }
+}
+
+struct MIDINote {
+  uint32_t timeStampIncrement;
+  uint8_t note;
+  uint8_t turnOnNote; // 1 - turn on, 2 - turn off
+};
+
+
+
+
+
+void BTHandler() {
+  switch (incomingByte) {
+    case FUNC_START_PLAYING:
+      start_clk_flag = true;
+      break;
+    case FUNC_STOP_PLAYING:
+      start_clk_flag = false;
+      break;
+    case FUNC_START_OF_DATA_TRANSMISSION:
+      Serial.println("BT state 1");
+      BT_state = 1;
+      break;
+    case FUNC_END_OF_DATA_TRANSMISSION:
+      Serial.println("BT state 0");
+      BT_state = 0;
+      break;
+    default:
+      Serial.println(incomingByte, HEX);
+      count++;
+    break;
+  }
+
+//  BLEmini.write(RESP_ACKNOWLEDGE);
+}
 
 void loop() {
-//  if(!clear_bit_shifter) {
-//    digitalWrite(SLOW_SRCLR,HIGH);
-//    digitalWrite(FAST_SRCLR,HIGH);
-//    clear_bit_shifter = true;
-//  } 
   
-  char data[] = "00000111";
-  LED_array_clk_gen(1,data,LED_DATA1);
-
+  // Background process
+  CLK_GEN();
+  
   // when Bluetooth Data comes in
-  if(Serial1.available() > 0) {
-    Serial.write( Serial1.read() );
-    
+  if(BLEmini.available() > 0) {
+    incomingByte = BLEmini.read();
+//    Serial.println( incomingByte, HEX );
+    BTHandler();
   }
-//  while ( Serial.available() )
-//  {
-//    unsigned char c = Serial.read();
-//    if (c != 0x0A)
-//    {
-//      if (len < 16)
-//        buf[len++] = c;
-//    }
-//    else
-//    {
-//      buf[len++] = 0x0A;
-//      
-//      for (int i = 0; i < len; i++)
-//         Serial1.write(buf[i]);
-//      len = 0;
-//    }
-//  }
-  
 }
+
+//void loop() {
+////  if(!clear_bit_shifter) {
+////    digitalWrite(SLOW_SRCLR,HIGH);
+////    digitalWrite(FAST_SRCLR,HIGH);
+////    clear_bit_shifter = true;
+////  } 
+//  
+////  char data[] = "00000111";
+////  LED_array_clk_gen(1,data,LED_DATA1);
+//
+//  // when Bluetooth Data comes in
+//  if(Serial1.available() > 0) {
+//    Serial.write( Serial1.read() );
+//    
+//  }
+//
+//  
+//}
