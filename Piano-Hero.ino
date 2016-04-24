@@ -8,13 +8,24 @@
 #define DEBUG_MODE 1
 
 #define BLEmini Serial1
+
+#define MAX_MIDI_EVENTS 5000
+
+typedef struct {
+  // digits 00 - time, 
+  // 01 - note on, 11 - note off
+  uint8_t data; 
+} MIDIEvent;
 /*
  * 
  * AtMega2560 Datasheet
  * http://www.atmel.com/images/atmel-2549-8-bit-avr-microcontroller-atmega640-1280-1281-2560-2561_datasheet.pdf
  * https://arduino-info.wikispaces.com/MegaQuickRef
  */
-
+unsigned long previousMillis = 0;
+unsigned long previousMillis_MIDI = 0;
+unsigned long curEventInterval_MIDI = 0;
+static bool temp_flag = false;
 
 //Adjust this value to change the sensitivity of the piezos
 const int PIEZO_THRESHOLD = 5;
@@ -58,9 +69,11 @@ FAST_RCLK,FAST_SRCLR};
 const int8_t input_pins[] = {PIEZO_DATA_IN1,PIEZO_DATA_IN2,
     PIEZO_DATA_IN3,PIEZO_DATA_IN4,PIEZO_DATA_IN5};
 
-// frequency
-static int slow_clk_freq = 1; // Hz
-static int fast_clk_freq = 8; // Hz
+// time read state: 0 - not read/initial, 1 - already read time
+static uint8_t time_read_state = 0;
+
+// SYS state
+static uint8_t SYS_state = 0;
 
 // BT state
 // 0 - wait for init, 1 - wait for value, 
@@ -71,7 +84,9 @@ static int count = 0;
 // Bluetooth Protocol
 //Arduino -> iPhone
 #define RESP_ACKNOWLEDGE 0xE5
-#define RESP_DECLINE 0x1A
+#define RESP_DECLINE 0xE6
+#define RESP_START_CONNECTION 0xE7
+#define RESP_END_CONNECTION 0xE8
 #define RESP_TEMP_ADJUST_FAST 0xA1
 #define RESP_TEMP_ADJUST_DOWN 0xA0
 //Arduino <- iPhone
@@ -92,8 +107,11 @@ volatile int trigger_value[5][8] = {{0},{0},{0},{0},{0}};
 
 static int current_column = 0;
 
-/*
- * ================ HELPER FUNCTIONS ================ 
+
+
+
+
+ /* ================ HELPER FUNCTIONS ================ 
  * 
  */
 
@@ -210,12 +228,11 @@ void setup() {
 // 15 - FAST_SRCLK up, FAST_RCLK down
 // 16 - FAST_SRCLK down, FAST_RCLK up
 //  --- set CLK frequency here ---
-static int slow_freq = 1; // the slow clock runs at 1Hz
+static int slow_freq = 8; // 16th note time = 60/120/4 = 0.125s ~ 8Hz
 static unsigned int CLK_state = 0;
 static int delay_time = 1000/slow_freq/2/8;
 static bool start_clk_flag = false;
-unsigned long previousMillis = 0;
-volatile char LED_data[5] = {0b01000001,0b00000000,0b00000000,0b00000000,0b00000000};
+static char LED_data[5] = {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000};
 bool dim_light[5] = {false};
 const int8_t LED_data_pin[5] = {LED_DATA1,LED_DATA2,LED_DATA3,LED_DATA4,LED_DATA5};
 
@@ -290,39 +307,167 @@ void clear_screen(bool clearScr) {
   }
 }
 
-struct MIDINote {
-  uint32_t timeStampIncrement;
-  uint8_t note;
-  uint8_t turnOnNote; // 1 - turn on, 2 - turn off
-};
 
 
+
+ /* ================ STRUCT DEFINITION ================ 
+ * 
+ */
+
+
+
+MIDIEvent MIDI_events[MAX_MIDI_EVENTS] = {0};
+int MIDI_events_write_idx = 0;
+
+uint8_t noteType(MIDIEvent e) {
+  return ((e.data >> 6) & 0b11);
+}
+uint8_t noteContent(MIDIEvent e) {
+  return ((e.data) & 0x3F);
+}
+
+void play_next_MIDI_event() {
+  if(MIDI_events_write_idx >1 && MIDI_events[MIDI_events_write_idx+1].data != 0) {
+    
+  }
+
+  // when no time is read
+  if(time_read_state == 0){
+    // when it reaches the end of the buffer
+    if((MIDI_events_write_idx >1) && (MIDI_events[MIDI_events_write_idx].data == 0)) {
+      return;
+    }
+    // and current pointer is time note
+    else if ( noteType(MIDI_events[MIDI_events_write_idx]) ==  0b00) {
+      
+      uint16_t p1 = noteContent(MIDI_events[MIDI_events_write_idx]);
+      uint16_t p2 = noteContent(MIDI_events[MIDI_events_write_idx+1]);
+      curEventInterval_MIDI = (p1 << 6) | p2;
+      Serial.print(curEventInterval_MIDI);
+      Serial.print(" ");
+      time_read_state = 1;
+      MIDI_events_write_idx += 2;
+    }
+  } else if (time_read_state == 1 && (millis() - previousMillis_MIDI) >= curEventInterval_MIDI) {  // when time is already read, read notes on/off info
+    previousMillis_MIDI = millis();
+    // when not finishing read the notes
+    while(time_read_state == 1) {
+      Serial.print(noteContent(MIDI_events[MIDI_events_write_idx]),DEC);
+      Serial.print(" ");
+      if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b01) { // on
+        turnOnNote(noteContent(MIDI_events[MIDI_events_write_idx]));
+      } else if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b11) { // off
+        turnOffNote(noteContent(MIDI_events[MIDI_events_write_idx]));
+      }
+  
+      // finished reading the current note
+      MIDI_events_write_idx += 1;
+      if(noteType(MIDI_events[MIDI_events_write_idx]) == 0b00){
+        time_read_state = 0;
+        Serial.println(" ");
+      }
+    }
+    
+    // display keys
+    for(int i = 0;i<5;i++){
+      printChar(LED_data[i]);
+    }
+    Serial.println("");
+
+  }
+  
+}
+
+// n starts from 1 to 36
+void turnOnNote(char n) {
+  if(n == 0) {
+    return;
+  }
+  char idx = (n-1)/8;
+  LED_data[idx] = LED_data[idx] | (1 << (8-(n%8)));
+
+  //DEBUG
+//  count++;
+}
+void turnOffNote(char n) {
+  if(n == 0) {
+    return;
+  }
+  char idx = (n-1)/8;
+  LED_data[idx] = LED_data[idx] & (~(1 << (8-(n%8))));
+}
+
+void printChar(char n) {
+  for(int i = 0; i < 8; i++){
+    Serial.print((n >> (7-i)) & 0x1);
+  }
+}
 
 
 
 void BTHandler() {
   switch (incomingByte) {
     case FUNC_START_PLAYING:
-      start_clk_flag = true;
+      if(SYS_state == 0){
+//        start_clk_flag = true;
+        BLEmini.write(RESP_START_CONNECTION);
+        SYS_state = 1;
+        Serial.println("Start Playing");
+        Serial.println(count);
+      }
       break;
     case FUNC_STOP_PLAYING:
-      start_clk_flag = false;
+      if(SYS_state == 1){
+        start_clk_flag = false;
+        BLEmini.write(RESP_END_CONNECTION);
+        SYS_state = 0;
+        Serial.println("Stop Playing");
+        Serial.println(count);
+        MIDI_events_write_idx = 0;
+        count = 0;
+        temp_flag = true;
+      }
+      
       break;
     case FUNC_START_OF_DATA_TRANSMISSION:
-      Serial.println("BT state 1");
+//      Serial.println("BT state 1");
       BT_state = 1;
       break;
     case FUNC_END_OF_DATA_TRANSMISSION:
-      Serial.println("BT state 0");
+//      Serial.println("BT state 0");
       BT_state = 0;
+      BLEmini.write(RESP_ACKNOWLEDGE);
+//      Serial.println("");
+      
+      count++;
       break;
     default:
-      Serial.println(incomingByte, HEX);
-      count++;
+//      Serial.println(incomingByte, HEX);
+      // parse the information
+      if(BT_state == 1) { // when transmiting data
+        uint8_t msg_type = ((incomingByte >> 6)&0x3);
+        uint8_t msg_note = (incomingByte & 0x3f);
+        if(msg_type != 0b10) {
+          if(MIDI_events_write_idx < MAX_MIDI_EVENTS -1){
+            MIDI_events[MIDI_events_write_idx++].data = incomingByte;  
+          }
+          
+        }
+//        if( msg_type == 0b01 ) { // NOTE ON msg
+//          turnOnNote(msg_note);
+//        } else if ( msg_type == 0b11) { // NOTE OFF msg
+//          turnOffNote(msg_note);
+//        }
+//        // display keys
+//        for(int i = 0;i<5;i++){
+//          printChar(LED_data[i]);
+//        }
+//        Serial.println("");
+      }
+      
     break;
   }
-
-//  BLEmini.write(RESP_ACKNOWLEDGE);
+//  count++;
 }
 
 void loop() {
@@ -336,6 +481,16 @@ void loop() {
 //    Serial.println( incomingByte, HEX );
     BTHandler();
   }
+  
+  if(temp_flag){
+    play_next_MIDI_event();  
+  }
+  
+
+//  if(millis() - previousMillis > 10000) {
+//    previousMillis = millis();
+//    Serial.println(count);
+//  }
 }
 
 //void loop() {
