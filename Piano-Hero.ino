@@ -24,14 +24,16 @@ typedef struct {
  */
 unsigned long previousMillis = 0;
 unsigned long previousMillis_MIDI = 0;
+unsigned long previousMillis_metronome = 0;
 unsigned long curEventInterval_MIDI = 0;
-static bool temp_flag = false;
 
 //Adjust this value to change the sensitivity of the piezos
 const int PIEZO_THRESHOLD = 5;
 
-// Pin Assignment
+//  ==== Pin Assignment =====
 // LED Array - LEDs
+const int8_t METRONOME =  2;
+
 const int8_t LED_DATA1 = 22;
 const int8_t LED_DATA2 = 23;
 const int8_t LED_DATA3 = 24;
@@ -41,11 +43,6 @@ const int8_t LED_DATA5 = 26;
 const int8_t PIEZO_C = 27;
 const int8_t PIEZO_B = 28;
 const int8_t PIEZO_A = 29;
-const int8_t PIEZO_DATA_IN1 = A15;
-const int8_t PIEZO_DATA_IN2 = A14;
-const int8_t PIEZO_DATA_IN3 = A13;
-const int8_t PIEZO_DATA_IN4 = A12;
-const int8_t PIEZO_DATA_IN5 = A11;
 
 const int8_t PIEZO_DATA_COMPARE1 = 30;
 const int8_t PIEZO_DATA_COMPARE2 = 31;
@@ -60,7 +57,12 @@ static int8_t FAST_SRCLK = 43;
 static int8_t FAST_RCLK = 44;
 static int8_t FAST_SRCLR = 45;
 
-const int8_t output_pins[] = {LED_DATA1,LED_DATA2,LED_DATA3,
+const int8_t PIEZO_DATA_IN1 = A15;
+const int8_t PIEZO_DATA_IN2 = A14;
+const int8_t PIEZO_DATA_IN3 = A13;
+const int8_t PIEZO_DATA_IN4 = A12;
+const int8_t PIEZO_DATA_IN5 = A11;
+const int8_t output_pins[] = {METRONOME, LED_DATA1,LED_DATA2,LED_DATA3,
 LED_DATA4,LED_DATA5,PIEZO_C,PIEZO_B,PIEZO_A,PIEZO_DATA_COMPARE1,
 PIEZO_DATA_COMPARE2,PIEZO_DATA_COMPARE3,PIEZO_DATA_COMPARE4,
 PIEZO_DATA_COMPARE5,SLOW_SRCLK,SLOW_RCLK,SLOW_SRCLR,FAST_SRCLK,
@@ -69,10 +71,23 @@ FAST_RCLK,FAST_SRCLR};
 const int8_t input_pins[] = {PIEZO_DATA_IN1,PIEZO_DATA_IN2,
     PIEZO_DATA_IN3,PIEZO_DATA_IN4,PIEZO_DATA_IN5};
 
+
+
+// ===== Finite State Machine =====
+
 // time read state: 0 - not read/initial, 1 - already read time
 static uint8_t time_read_state = 0;
 
-// SYS state
+// metronome state: 0 - init, 1 -> 3 -  wait, 4 - fire
+static uint8_t metronome_state = 0;
+static bool metronome_enabled = 0;
+static bool metronome_turn_off_flag = false;
+static uint8_t metronome_volume = 50;
+
+// SYS state:
+// 0 - initial state/normal
+// 1 - loading state
+// 2 - playback state
 static uint8_t SYS_state = 0;
 
 // BT state
@@ -87,15 +102,26 @@ static int count = 0;
 #define RESP_DECLINE 0xE6
 #define RESP_START_CONNECTION 0xE7
 #define RESP_END_CONNECTION 0xE8
+#define RESP_START_PLAYBACK 0xE9
+#define RESP_END_PLAYBACK 0xEA
+#define RESP_TOGGLE_METRONOME 0xEB
+//#define RESP_METRONOME_VOL_UP 0xED
+//#define RESP_METRONOME_VOL_DOWN 0xEE
 #define RESP_TEMP_ADJUST_FAST 0xA1
 #define RESP_TEMP_ADJUST_DOWN 0xA0
+
 //Arduino <- iPhone
-#define FUNC_START_PLAYING 0x97
-#define FUNC_STOP_PLAYING 0x98
+#define FUNC_START_LOADING 0x97
+#define FUNC_STOP_LOADING 0x98
 #define FUNC_START_OF_DATA_TRANSMISSION 0x99
 #define FUNC_END_OF_DATA_TRANSMISSION 0x9A
-#define FUNC_CLR_SCREEN 0x99
-#define FUNC_TEMP_ADJUST_FAST 0x91
+#define FUNC_START_PLAYBACK 0x9B
+#define FUNC_PAUSE_PLAYBACK 0x9C
+#define FUNC_TOGGLE_METRONOME 0x9D
+#define FUNC_METRONOME_VOL_UP 0x9E
+#define FUNC_METRONOME_VOL_DOWN 0x9F
+#define FUNC_CLR_SCREEN 0xAF
+#define FUNC_TEMP_ADJUST_UP 0x91
 #define FUNC_TEMP_ADJUST_DOWN 0x90
 
 
@@ -181,6 +207,7 @@ void setup() {
   int8_t num_outputs = sizeof(output_pins);
   int8_t num_inputs = sizeof(input_pins);
   // init output pins
+  Serial.println();
   Serial.print("init output pins: ");
   for(int i = 0; i < num_outputs;i++){
     pinMode(output_pins[i], OUTPUT);
@@ -196,7 +223,7 @@ void setup() {
     Serial.print(input_pins[i]);
     attachPinChangeInterrupt(input_pins[i],piezo_interrupt_handler,RISING);
   }
-
+  Serial.println();
   BLEmini.begin(57600);
 
   // CLR bit shifter
@@ -229,9 +256,14 @@ void setup() {
 // 16 - FAST_SRCLK down, FAST_RCLK up
 //  --- set CLK frequency here ---
 static int slow_freq = 8; // 16th note time = 60/120/4 = 0.125s ~ 8Hz
+static int freq_metronome = slow_freq/4;
+static int delay_time_metronome = 1000/freq_metronome/2;
+static int on_time_metronome = 20;
+
 static unsigned int CLK_state = 0;
 static int delay_time = 1000/slow_freq/2/8;
 static bool start_clk_flag = false;
+static bool pause_clk_flag = false;
 static char LED_data[5] = {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000};
 bool dim_light[5] = {false};
 const int8_t LED_data_pin[5] = {LED_DATA1,LED_DATA2,LED_DATA3,LED_DATA4,LED_DATA5};
@@ -242,38 +274,52 @@ void CLK_GEN_helper() {
   if (CLK_state == 1){
     digitalWrite(SLOW_SRCLK, HIGH);
     digitalWrite(SLOW_RCLK, LOW);
-  } else if (CLK_state == 8){
+
+    // metronome synced with slow clk
+    metronome_state++;
+    if(metronome_state == 4){
+      if(metronome_enabled){
+        analogWrite(METRONOME,metronome_volume);
+        metronome_turn_off_flag = true;
+      }
+      previousMillis_metronome = millis();
+    } else if(metronome_state == 5){
+      metronome_state = 1;
+    }
+    
+  } 
+  if (CLK_state == 9){
     digitalWrite(SLOW_SRCLK, LOW);
     digitalWrite(SLOW_RCLK, HIGH);
   }
   if(CLK_state % 2 != 0){
     digitalWrite(FAST_SRCLK, HIGH);
     digitalWrite(FAST_RCLK, LOW);
-    if(start_clk_flag){
+//    if(start_clk_flag){
       for(int i = 0; i < 5; i++){
-        if((LED_data[i] >> (7-(CLK_state-1)/2)) & (0x1) == 1){
-          Serial.print(CLK_state);
-          Serial.print("  light up!! ");
-          Serial.println(LED_data_pin[i]);
+        if((LED_data[i] >> (9-(17-CLK_state)/2)) & (0x1) == 1){
+//          Serial.print(CLK_state);
+//          Serial.print("  light up!! ");
+//          Serial.println(LED_data_pin[i]);
           dim_light[i] = true;
           digitalWrite(LED_data_pin[i],HIGH);
         }
       }
-    }
+//    }
   } else {
     digitalWrite(FAST_SRCLK, LOW);
     digitalWrite(FAST_RCLK, HIGH); 
-    if(start_clk_flag){
+//    if(start_clk_flag){
       for(int i = 0; i < 5; i++){
         if(dim_light[i]){
-          Serial.print(CLK_state);
-          Serial.print("  dim down!! ");
-          Serial.println(LED_data_pin[i]);
+//          Serial.print(CLK_state);
+//          Serial.print("  dim down!! ");
+//          Serial.println(LED_data_pin[i]);
           dim_light[i] = false;
           digitalWrite(LED_data_pin[i],LOW);
         }
       } 
-    }
+//    }
   }
   
   previousMillis = millis();
@@ -282,6 +328,12 @@ void CLK_GEN_helper() {
 
 // Synchronous Clock Generator
 void CLK_GEN() {
+  if(metronome_turn_off_flag){
+    if(millis() - previousMillis_metronome > on_time_metronome){
+      analogWrite(METRONOME,0);
+      metronome_turn_off_flag = false;
+    }
+  }
   if (CLK_state == 0){
     if(start_clk_flag){
         CLK_state = 1;
@@ -310,6 +362,7 @@ void clear_screen(bool clearScr) {
 
 
 
+
  /* ================ STRUCT DEFINITION ================ 
  * 
  */
@@ -327,14 +380,12 @@ uint8_t noteContent(MIDIEvent e) {
 }
 
 void play_next_MIDI_event() {
-  if(MIDI_events_write_idx >1 && MIDI_events[MIDI_events_write_idx+1].data != 0) {
-    
-  }
-
   // when no time is read
   if(time_read_state == 0){
     // when it reaches the end of the buffer
     if((MIDI_events_write_idx >1) && (MIDI_events[MIDI_events_write_idx].data == 0)) {
+      SYS_state = 0;
+      BLEmini.write(RESP_END_PLAYBACK);
       return;
     }
     // and current pointer is time note
@@ -364,7 +415,7 @@ void play_next_MIDI_event() {
       MIDI_events_write_idx += 1;
       if(noteType(MIDI_events[MIDI_events_write_idx]) == 0b00){
         time_read_state = 0;
-        Serial.println(" ");
+//        Serial.println(" ");
       }
     }
     
@@ -407,39 +458,97 @@ void printChar(char n) {
 
 void BTHandler() {
   switch (incomingByte) {
-    case FUNC_START_PLAYING:
+    case FUNC_START_LOADING:
       if(SYS_state == 0){
 //        start_clk_flag = true;
         BLEmini.write(RESP_START_CONNECTION);
         SYS_state = 1;
-        Serial.println("Start Playing");
+        Serial.println("FUNC_START_LOADING");
         Serial.println(count);
       }
       break;
-    case FUNC_STOP_PLAYING:
+    case FUNC_STOP_LOADING:
       if(SYS_state == 1){
         start_clk_flag = false;
         BLEmini.write(RESP_END_CONNECTION);
         SYS_state = 0;
-        Serial.println("Stop Playing");
+        Serial.println("FUNC_STOP_LOADING");
         Serial.println(count);
         MIDI_events_write_idx = 0;
         count = 0;
-        temp_flag = true;
+        start_clk_flag = true;
       }
-      
       break;
     case FUNC_START_OF_DATA_TRANSMISSION:
-//      Serial.println("BT state 1");
       BT_state = 1;
       break;
     case FUNC_END_OF_DATA_TRANSMISSION:
-//      Serial.println("BT state 0");
       BT_state = 0;
       BLEmini.write(RESP_ACKNOWLEDGE);
-//      Serial.println("");
-      
       count++;
+      break;
+    case FUNC_START_PLAYBACK:
+      if(SYS_state == 0){
+        pause_clk_flag = false;
+        start_clk_flag = true;
+        SYS_state = 2;
+//        MIDI_events_write_idx = 0;
+        BLEmini.write(RESP_START_PLAYBACK);
+        Serial.println("FUNC_START_PLAYBACK");
+      }
+      break;
+    case FUNC_PAUSE_PLAYBACK:
+      if(SYS_state == 2){
+        pause_clk_flag = true;
+        start_clk_flag = false;
+        SYS_state = 0;
+        BLEmini.write(RESP_END_PLAYBACK);
+        Serial.println("FUNC_END_PLAYBACK");
+      }
+      break;
+    case FUNC_TOGGLE_METRONOME:
+      if(SYS_state == 2){
+        if(metronome_enabled){
+          metronome_enabled = false;
+        }else{
+          metronome_enabled = true;
+        }
+        BLEmini.write(RESP_TOGGLE_METRONOME);
+        Serial.println("RESP_TOGGLE_METRONOME");
+      }
+    case FUNC_METRONOME_VOL_UP:
+      if(int(metronome_volume) + 20 > 250){
+        metronome_volume = 250;
+      } else {
+        metronome_volume += 20;
+      }
+      BLEmini.write(RESP_ACKNOWLEDGE);
+      Serial.println("FUNC_METRONOME_VOL_UP");
+      break;
+    case FUNC_METRONOME_VOL_DOWN:
+      if(int(metronome_volume) - 20 < 0){
+        metronome_volume = 0;
+      } else {
+        metronome_volume -= 20;
+      }
+      BLEmini.write(RESP_ACKNOWLEDGE);
+      Serial.println("FUNC_METRONOME_VOL_DOWN");
+      break;
+    case FUNC_TEMP_ADJUST_UP:
+      if(SYS_state != 1){
+
+        Serial.println("FUNC_TEMP_ADJUST_UP");
+      }
+      
+      BLEmini.write(RESP_ACKNOWLEDGE);
+      break;
+    case FUNC_TEMP_ADJUST_DOWN:
+      if(SYS_state != 1){
+
+        Serial.println("FUNC_TEMP_ADJUST_DOWN");
+      }
+      
+      BLEmini.write(RESP_ACKNOWLEDGE);
       break;
     default:
 //      Serial.println(incomingByte, HEX);
@@ -451,29 +560,20 @@ void BTHandler() {
           if(MIDI_events_write_idx < MAX_MIDI_EVENTS -1){
             MIDI_events[MIDI_events_write_idx++].data = incomingByte;  
           }
-          
         }
-//        if( msg_type == 0b01 ) { // NOTE ON msg
-//          turnOnNote(msg_note);
-//        } else if ( msg_type == 0b11) { // NOTE OFF msg
-//          turnOffNote(msg_note);
-//        }
-//        // display keys
-//        for(int i = 0;i<5;i++){
-//          printChar(LED_data[i]);
-//        }
-//        Serial.println("");
       }
-      
     break;
   }
-//  count++;
 }
 
+
 void loop() {
-  
   // Background process
-  CLK_GEN();
+  if(!pause_clk_flag){
+    CLK_GEN();
+  }
+
+  
   
   // when Bluetooth Data comes in
   if(BLEmini.available() > 0) {
@@ -482,15 +582,10 @@ void loop() {
     BTHandler();
   }
   
-  if(temp_flag){
+  if(SYS_state == 2){
     play_next_MIDI_event();  
   }
   
-
-//  if(millis() - previousMillis > 10000) {
-//    previousMillis = millis();
-//    Serial.println(count);
-//  }
 }
 
 //void loop() {
