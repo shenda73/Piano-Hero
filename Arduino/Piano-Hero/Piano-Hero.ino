@@ -4,12 +4,35 @@
  */
  
 #include <PinChangeInt.h>
- 
+
+#include <LiquidCrystal.h>
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_TFTLCD.h> // Hardware-specific library
+
+
+#define LCD_CS A3 // Chip Select goes to Analog 3
+#define LCD_CD A2 // Command/Data goes to Analog 2
+#define LCD_WR A1 // LCD Write goes to Analog 1
+#define LCD_RD A0 // LCD Read goes to Analog 0
+#define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
+
+Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
+
+// Assign human-readable names to some common 16-bit color values:
+#define  BLACK   0x0000
+#define BLUE    0x001F
+#define RED     0xF800
+#define GREEN   0x07E0
+#define CYAN    0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW  0xFFE0
+#define WHITE   0xFFFF
+
 #define DEBUG_MODE 1
 
 #define BLEmini Serial1
 
-#define MAX_MIDI_EVENTS 5000
+#define MAX_MIDI_EVENTS 4500
 
 typedef struct {
   // digits 00 - time, 
@@ -32,7 +55,18 @@ const int PIEZO_THRESHOLD = 5;
 
 //  ==== Pin Assignment =====
 // LED Array - LEDs
-const int8_t METRONOME =  2;
+const int8_t METRONOME =  13;
+const int8_t SCREEN_DATA0 = 30;
+const int8_t SCREEN_DATA1 = 31;
+const int8_t SCREEN_DATA2 = 32;
+const int8_t SCREEN_DATA3 = 33;
+const int8_t SCREEN_DATA4 = 34;
+const int8_t SCREEN_DATA5 = 35;
+const int8_t SCREEN_DATA6 = 36;
+const int8_t SCREEN_DATA7 = 37;
+const int8_t SCREEN_EN = 38;
+const int8_t SCREEN_RW = 39;
+const int8_t SCREEN_RS = 46;
 
 const int8_t LED_DATA1 = 22;
 const int8_t LED_DATA2 = 23;
@@ -44,33 +78,51 @@ const int8_t PIEZO_C = 27;
 const int8_t PIEZO_B = 28;
 const int8_t PIEZO_A = 29;
 
-const int8_t PIEZO_DATA_COMPARE1 = 30;
-const int8_t PIEZO_DATA_COMPARE2 = 31;
-const int8_t PIEZO_DATA_COMPARE3 = 32;
-const int8_t PIEZO_DATA_COMPARE4 = 33;
-const int8_t PIEZO_DATA_COMPARE5 = 34;
+
 
 static int8_t SLOW_SRCLK = 40;
 static int8_t SLOW_RCLK = 41;
-static int8_t SLOW_SRCLR = 42;
+static int8_t SLOW_SRCLR = 42;  // set high
 static int8_t FAST_SRCLK = 43;
 static int8_t FAST_RCLK = 44;
-static int8_t FAST_SRCLR = 45;
+static int8_t FAST_SRCLR = 45;  // set high
+
+// TODO: interrup pins
+static int8_t ROTARY_A = 47;
+static int8_t ROTARY_B = 48;
+static int8_t ROTARY_PRESS = 49;
+
+static int8_t GND_PIN1 = 50;
+static int8_t GND_PIN2 = 51;
+static int8_t GND_PIN3 = 52;
+
 
 const int8_t PIEZO_DATA_IN1 = A15;
 const int8_t PIEZO_DATA_IN2 = A14;
 const int8_t PIEZO_DATA_IN3 = A13;
 const int8_t PIEZO_DATA_IN4 = A12;
 const int8_t PIEZO_DATA_IN5 = A11;
-const int8_t output_pins[] = {METRONOME, LED_DATA1,LED_DATA2,LED_DATA3,
-LED_DATA4,LED_DATA5,PIEZO_C,PIEZO_B,PIEZO_A,PIEZO_DATA_COMPARE1,
-PIEZO_DATA_COMPARE2,PIEZO_DATA_COMPARE3,PIEZO_DATA_COMPARE4,
-PIEZO_DATA_COMPARE5,SLOW_SRCLK,SLOW_RCLK,SLOW_SRCLR,FAST_SRCLK,
-FAST_RCLK,FAST_SRCLR};
+const int8_t output_pins[] = {METRONOME,SCREEN_DATA0,SCREEN_DATA1,
+SCREEN_DATA2,SCREEN_DATA3,SCREEN_DATA4,SCREEN_DATA5,SCREEN_DATA6,
+SCREEN_DATA7,SCREEN_EN,SCREEN_RW,SCREEN_RS,LED_DATA1,LED_DATA2,LED_DATA3,
+LED_DATA4,LED_DATA5,PIEZO_C,PIEZO_B,PIEZO_A,SLOW_SRCLK,SLOW_RCLK,
+SLOW_SRCLR,FAST_SRCLK,FAST_RCLK,FAST_SRCLR,GND_PIN1,GND_PIN2,GND_PIN3};
 
 const int8_t input_pins[] = {PIEZO_DATA_IN1,PIEZO_DATA_IN2,
     PIEZO_DATA_IN3,PIEZO_DATA_IN4,PIEZO_DATA_IN5};
 
+
+// ===== Encoder ======
+// adapted from http://bildr.org/2012/08/rotary-encoder-arduino/
+volatile int lastEncoded = 0;
+volatile long encoderValue = 0;
+
+long lastencoderValue = 0;
+int lastMSB = 0;
+int lastLSB = 0;
+
+// ===== LCD Screen =====
+LiquidCrystal lcd(SCREEN_RS, SCREEN_EN, SCREEN_DATA4, SCREEN_DATA5, SCREEN_DATA6, SCREEN_DATA7);
 
 
 // ===== Finite State Machine =====
@@ -83,12 +135,19 @@ static uint8_t metronome_state = 0;
 static bool metronome_enabled = 0;
 static bool metronome_turn_off_flag = false;
 static uint8_t metronome_volume = 50;
+static double tempo_factor = 1.0;
+
+// setting state
+// 0 - volume
+// 1 - tempo speed
+static volatile uint8_t setting_state = 0;
+
 
 // SYS state:
 // 0 - initial state/normal
 // 1 - loading state
 // 2 - playback state
-static uint8_t SYS_state = 0;
+static volatile uint8_t SYS_state = 0;
 
 // BT state
 // 0 - wait for init, 1 - wait for value, 
@@ -177,17 +236,16 @@ void piezo_loop(const int8_t piezo_data_pins[]) {
 //    Serial.println(A);
     for(int j = 0;j<5;j++){
       trigger_value[j][i] = analogRead(piezo_data_pins[j]);
-      if(trigger_value[j][i] > PIEZO_THRESHOLD) {
-//        Serial.print("knock detected: key");
+      if(trigger_value[j][i] > PIEZO_THRESHOLD+50) {
+        trigger_value[j][i] = 0;
+        Serial.print("knock detected: ");
 //        Serial.println(j*8+i+1);
+        Serial.println(noteForMidiNumber((j*8+i+1) + 47));
         // should let other program do things
       }
     }
   }
 }
-
-
-
 
 
 
@@ -198,6 +256,11 @@ void piezo_loop(const int8_t piezo_data_pins[]) {
 static bool clear_bit_shifter = true;
 
 void setup() {
+//  lcd.begin(16,2);
+  uint16_t identifier = tft.readID();
+  identifier=0x9341;
+  tft.begin(identifier);
+  
   if(DEBUG_MODE){
     Serial.begin(57600);
     Serial.println("Setup Arduino...");
@@ -218,11 +281,23 @@ void setup() {
   Serial.println("");
   Serial.print("init input pins: ");
   for(int i = 0; i < num_inputs;i++){
-    pinMode(input_pins[i], INPUT_PULLUP);
+    pinMode(input_pins[i], INPUT);
     Serial.print(" ");
     Serial.print(input_pins[i]);
     attachPinChangeInterrupt(input_pins[i],piezo_interrupt_handler,RISING);
   }
+
+// set rotary encoder
+  pinMode(ROTARY_A,INPUT);
+  pinMode(ROTARY_B,INPUT);
+  pinMode(ROTARY_PRESS,INPUT);
+  digitalWrite(ROTARY_A,HIGH);
+  digitalWrite(ROTARY_B,HIGH);
+  digitalWrite(ROTARY_PRESS,HIGH);
+  PCintPort::attachInterrupt(ROTARY_A, updateEncoder, CHANGE);
+  PCintPort::attachInterrupt(ROTARY_B, updateEncoder, CHANGE);
+  PCintPort::attachInterrupt(ROTARY_PRESS, updateSettingState, CHANGE);
+  
   Serial.println();
   BLEmini.begin(57600);
 
@@ -232,6 +307,14 @@ void setup() {
     digitalWrite(FAST_SRCLR,LOW);
     clear_bit_shifter = false;
   }
+
+  // set fixed pins
+  digitalWrite(SLOW_SRCLR,HIGH);
+  digitalWrite(FAST_SRCLR,HIGH);
+  digitalWrite(GND_PIN1,LOW);
+  digitalWrite(GND_PIN2,LOW);
+  digitalWrite(GND_PIN3,LOW);
+  digitalWrite(SCREEN_RW,LOW);
   
 }
 
@@ -255,7 +338,7 @@ void setup() {
 // 15 - FAST_SRCLK up, FAST_RCLK down
 // 16 - FAST_SRCLK down, FAST_RCLK up
 //  --- set CLK frequency here ---
-static int slow_freq = 8; // 16th note time = 60/120/4 = 0.125s ~ 8Hz
+static int slow_freq = 8 * tempo_factor; // 16th note time = 60/120/4 = 0.125s ~ 8Hz
 static int freq_metronome = slow_freq/4;
 static int delay_time_metronome = 1000/freq_metronome/2;
 static int on_time_metronome = 20;
@@ -349,6 +432,73 @@ void CLK_GEN() {
   }
 }
 
+void updateEncoder(){
+  int MSB = digitalRead(ROTARY_A); //MSB = most significant bit
+  int LSB = digitalRead(ROTARY_B); //LSB = least significant bit
+
+  int encoded = (MSB << 1) |LSB; //converting the 2 pin value to single number
+  int sum  = (lastEncoded << 2) | encoded; //adding it to the previous encoded value
+
+  int prev_encoder_value = encoderValue;
+
+  if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) encoderValue ++;
+  if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) encoderValue --;
+
+  if(encoderValue - prev_encoder_value > 0){ // CW
+    if(setting_state == 0){ // volume up
+      if(metronome_volume + 25 <250){
+        metronome_volume += 25;
+      } else {
+        metronome_volume = 250;
+      }
+    } else if (setting_state == 1){ // tempo speed up
+      if(SYS_state != 1){
+        if(tempo_factor + 0.1 < 2.0){
+          tempo_factor += 0.1;
+          slow_freq = 8 * tempo_factor;
+          freq_metronome = slow_freq/4;
+          delay_time_metronome = 1000/freq_metronome/2;
+          delay_time = 1000/slow_freq/2/8;
+        }
+      }
+    }
+  } else if (encoderValue - prev_encoder_value < 0){ // CCW
+    if(setting_state == 0){ // volume down
+      if(int(metronome_volume) - 25 > 0){
+        metronome_volume -= 25;
+      } else {
+        metronome_volume = 250;
+      }
+    } else if (setting_state == 1){ // tempo speed down
+      if(SYS_state != 1){
+        if(tempo_factor - 0.1 > 0.3){
+          tempo_factor -= 0.1;
+          slow_freq = 8 * tempo_factor;
+          freq_metronome = slow_freq/4;
+          delay_time_metronome = 1000/freq_metronome/2;
+          delay_time = 1000/slow_freq/2/8;
+        }
+      }
+    }
+  }
+
+  lastEncoded = encoded; //store this value for next time
+}
+
+
+void updateSettingState(){
+  int value_read = digitalRead(ROTARY_PRESS);
+  if(!value_read){ //button is  pushed
+    if(setting_state == 0){
+      // Serial.print("Tempo Speed setting");
+      setting_state = 1;
+    } else if (setting_state == 1) { 
+      // Serial.print("Metronome Volume setting");
+      setting_state = 0;
+    }
+  }
+}
+
 void clear_screen(bool clearScr) {
   if(clearScr){
     digitalWrite(SLOW_SRCLR,LOW);
@@ -393,7 +543,7 @@ void play_next_MIDI_event() {
       
       uint16_t p1 = noteContent(MIDI_events[MIDI_events_write_idx]);
       uint16_t p2 = noteContent(MIDI_events[MIDI_events_write_idx+1]);
-      curEventInterval_MIDI = (p1 << 6) | p2;
+      curEventInterval_MIDI = ((p1 << 6) | p2)/tempo_factor;
       Serial.print(curEventInterval_MIDI);
       Serial.print(" ");
       time_read_state = 1;
@@ -403,19 +553,24 @@ void play_next_MIDI_event() {
     previousMillis_MIDI = millis();
     // when not finishing read the notes
     while(time_read_state == 1) {
-      Serial.print(noteContent(MIDI_events[MIDI_events_write_idx]),DEC);
-      Serial.print(" ");
-      if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b01) { // on
-        turnOnNote(noteContent(MIDI_events[MIDI_events_write_idx]));
-      } else if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b11) { // off
-        turnOffNote(noteContent(MIDI_events[MIDI_events_write_idx]));
-      }
-  
-      // finished reading the current note
-      MIDI_events_write_idx += 1;
-      if(noteType(MIDI_events[MIDI_events_write_idx]) == 0b00){
+      if(noteContent(MIDI_events[MIDI_events_write_idx]) == 0) {
         time_read_state = 0;
-//        Serial.println(" ");
+        break;
+      } else{
+        Serial.print(noteContent(MIDI_events[MIDI_events_write_idx]),DEC);
+        Serial.print(" ");
+        if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b01) { // on
+          turnOnNote(noteContent(MIDI_events[MIDI_events_write_idx]));
+        } else if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b11) { // off
+          turnOffNote(noteContent(MIDI_events[MIDI_events_write_idx]));
+        }
+    
+        // finished reading the current note
+        MIDI_events_write_idx += 1;
+        if(noteType(MIDI_events[MIDI_events_write_idx]) == 0b00){
+          time_read_state = 0;
+//          Serial.println(" ");
+        }
       }
     }
     
@@ -536,7 +691,13 @@ void BTHandler() {
       break;
     case FUNC_TEMP_ADJUST_UP:
       if(SYS_state != 1){
-
+        if(tempo_factor + 0.1 < 2.0){
+          tempo_factor += 0.1;
+          slow_freq = 8 * tempo_factor;
+          freq_metronome = slow_freq/4;
+          delay_time_metronome = 1000/freq_metronome/2;
+          delay_time = 1000/slow_freq/2/8;
+        }
         Serial.println("FUNC_TEMP_ADJUST_UP");
       }
       
@@ -544,7 +705,13 @@ void BTHandler() {
       break;
     case FUNC_TEMP_ADJUST_DOWN:
       if(SYS_state != 1){
-
+        if(tempo_factor - 0.1 > 0.3){
+          tempo_factor -= 0.1;
+          slow_freq = 8 * tempo_factor;
+          freq_metronome = slow_freq/4;
+          delay_time_metronome = 1000/freq_metronome/2;
+          delay_time = 1000/slow_freq/2/8;
+        }
         Serial.println("FUNC_TEMP_ADJUST_DOWN");
       }
       
@@ -568,12 +735,14 @@ void BTHandler() {
 
 
 void loop() {
+  piezo_loop(input_pins);
+//  lcd.print("hello, world!");
+//  tft.setRotation(4);
+//  testText();
   // Background process
   if(!pause_clk_flag){
     CLK_GEN();
   }
-
-  
   
   // when Bluetooth Data comes in
   if(BLEmini.available() > 0) {
@@ -587,6 +756,16 @@ void loop() {
   }
   
 }
+unsigned long testText() {
+  tft.fillScreen(BLACK);
+  unsigned long start = micros();
+  tft.setCursor(0, 0);
+  tft.setTextColor(WHITE);  tft.setTextSize(1);
+  tft.println("Piano Hero");
+  
+  return micros() - start;
+}
+
 
 //void loop() {
 ////  if(!clear_bit_shifter) {

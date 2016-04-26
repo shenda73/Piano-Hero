@@ -1,0 +1,545 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		929A7FA41CCC1D5D0021507F /* Undertale_-_080_Finale.mid in Resources */ = {isa = PBXBuildFile; fileRef = 929A7FA31CCC1D5D0021507F /* Undertale_-_080_Finale.mid */; };
+		92A82C7C1CC03FFD0080AFC3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C7B1CC03FFD0080AFC3 /* AppDelegate.swift */; };
+		92A82C7E1CC03FFD0080AFC3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C7D1CC03FFD0080AFC3 /* ViewController.swift */; };
+		92A82C811CC03FFD0080AFC3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 92A82C7F1CC03FFD0080AFC3 /* Main.storyboard */; };
+		92A82C841CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C821CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld */; };
+		92A82C861CC03FFD0080AFC3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 92A82C851CC03FFD0080AFC3 /* Assets.xcassets */; };
+		92A82C891CC03FFD0080AFC3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 92A82C871CC03FFD0080AFC3 /* LaunchScreen.storyboard */; };
+		92A82C941CC03FFD0080AFC3 /* Piano_HeroTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C931CC03FFD0080AFC3 /* Piano_HeroTests.swift */; };
+		92A82C9F1CC03FFD0080AFC3 /* Piano_HeroUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C9E1CC03FFD0080AFC3 /* Piano_HeroUITests.swift */; };
+		92A82CB11CC0480F0080AFC3 /* BLE-Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82CB01CC0480F0080AFC3 /* BLE-Swift.swift */; };
+		92A82CB31CC9A7750080AFC3 /* MIDIParse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82CB21CC9A7750080AFC3 /* MIDIParse.swift */; };
+		92C60F541CCD5CBA00FE9F40 /* measures_2_4.midi in Resources */ = {isa = PBXBuildFile; fileRef = 92C60F531CCD5CBA00FE9F40 /* measures_2_4.midi */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		92A82C901CC03FFD0080AFC3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 92A82C701CC03FFD0080AFC3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 92A82C771CC03FFD0080AFC3;
+			remoteInfo = "Piano-Hero";
+		};
+		92A82C9B1CC03FFD0080AFC3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 92A82C701CC03FFD0080AFC3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 92A82C771CC03FFD0080AFC3;
+			remoteInfo = "Piano-Hero";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		929A7FA31CCC1D5D0021507F /* Undertale_-_080_Finale.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = "Undertale_-_080_Finale.mid"; sourceTree = "<group>"; };
+		92A82C781CC03FFD0080AFC3 /* Piano-Hero.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Piano-Hero.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		92A82C7B1CC03FFD0080AFC3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		92A82C7D1CC03FFD0080AFC3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		92A82C801CC03FFD0080AFC3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		92A82C831CC03FFD0080AFC3 /* Piano_Hero.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Piano_Hero.xcdatamodel; sourceTree = "<group>"; };
+		92A82C851CC03FFD0080AFC3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		92A82C881CC03FFD0080AFC3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		92A82C8A1CC03FFD0080AFC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		92A82C8F1CC03FFD0080AFC3 /* Piano-HeroTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Piano-HeroTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		92A82C931CC03FFD0080AFC3 /* Piano_HeroTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Piano_HeroTests.swift; sourceTree = "<group>"; };
+		92A82C951CC03FFD0080AFC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		92A82C9A1CC03FFD0080AFC3 /* Piano-HeroUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Piano-HeroUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		92A82C9E1CC03FFD0080AFC3 /* Piano_HeroUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Piano_HeroUITests.swift; sourceTree = "<group>"; };
+		92A82CA01CC03FFD0080AFC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		92A82CB01CC0480F0080AFC3 /* BLE-Swift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "BLE-Swift.swift"; path = "BLE/BLE-Swift.swift"; sourceTree = "<group>"; };
+		92A82CB21CC9A7750080AFC3 /* MIDIParse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIParse.swift; sourceTree = "<group>"; };
+		92C60F531CCD5CBA00FE9F40 /* measures_2_4.midi */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = measures_2_4.midi; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		92A82C751CC03FFD0080AFC3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A82C8C1CC03FFD0080AFC3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A82C971CC03FFD0080AFC3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		92A82C6F1CC03FFD0080AFC3 = {
+			isa = PBXGroup;
+			children = (
+				92A82C7A1CC03FFD0080AFC3 /* Piano-Hero */,
+				92A82C921CC03FFD0080AFC3 /* Piano-HeroTests */,
+				92A82C9D1CC03FFD0080AFC3 /* Piano-HeroUITests */,
+				92A82C791CC03FFD0080AFC3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		92A82C791CC03FFD0080AFC3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				92A82C781CC03FFD0080AFC3 /* Piano-Hero.app */,
+				92A82C8F1CC03FFD0080AFC3 /* Piano-HeroTests.xctest */,
+				92A82C9A1CC03FFD0080AFC3 /* Piano-HeroUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		92A82C7A1CC03FFD0080AFC3 /* Piano-Hero */ = {
+			isa = PBXGroup;
+			children = (
+				92A82C7B1CC03FFD0080AFC3 /* AppDelegate.swift */,
+				92A82CB01CC0480F0080AFC3 /* BLE-Swift.swift */,
+				92A82C7D1CC03FFD0080AFC3 /* ViewController.swift */,
+				92A82CB21CC9A7750080AFC3 /* MIDIParse.swift */,
+				92C60F531CCD5CBA00FE9F40 /* measures_2_4.midi */,
+				92A82C7F1CC03FFD0080AFC3 /* Main.storyboard */,
+				92A82C851CC03FFD0080AFC3 /* Assets.xcassets */,
+				92A82C871CC03FFD0080AFC3 /* LaunchScreen.storyboard */,
+				92A82C8A1CC03FFD0080AFC3 /* Info.plist */,
+				929A7FA31CCC1D5D0021507F /* Undertale_-_080_Finale.mid */,
+				92A82C821CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld */,
+			);
+			path = "Piano-Hero";
+			sourceTree = "<group>";
+		};
+		92A82C921CC03FFD0080AFC3 /* Piano-HeroTests */ = {
+			isa = PBXGroup;
+			children = (
+				92A82C931CC03FFD0080AFC3 /* Piano_HeroTests.swift */,
+				92A82C951CC03FFD0080AFC3 /* Info.plist */,
+			);
+			path = "Piano-HeroTests";
+			sourceTree = "<group>";
+		};
+		92A82C9D1CC03FFD0080AFC3 /* Piano-HeroUITests */ = {
+			isa = PBXGroup;
+			children = (
+				92A82C9E1CC03FFD0080AFC3 /* Piano_HeroUITests.swift */,
+				92A82CA01CC03FFD0080AFC3 /* Info.plist */,
+			);
+			path = "Piano-HeroUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		92A82C771CC03FFD0080AFC3 /* Piano-Hero */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 92A82CA31CC03FFD0080AFC3 /* Build configuration list for PBXNativeTarget "Piano-Hero" */;
+			buildPhases = (
+				92A82C741CC03FFD0080AFC3 /* Sources */,
+				92A82C751CC03FFD0080AFC3 /* Frameworks */,
+				92A82C761CC03FFD0080AFC3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Piano-Hero";
+			productName = "Piano-Hero";
+			productReference = 92A82C781CC03FFD0080AFC3 /* Piano-Hero.app */;
+			productType = "com.apple.product-type.application";
+		};
+		92A82C8E1CC03FFD0080AFC3 /* Piano-HeroTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 92A82CA61CC03FFD0080AFC3 /* Build configuration list for PBXNativeTarget "Piano-HeroTests" */;
+			buildPhases = (
+				92A82C8B1CC03FFD0080AFC3 /* Sources */,
+				92A82C8C1CC03FFD0080AFC3 /* Frameworks */,
+				92A82C8D1CC03FFD0080AFC3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				92A82C911CC03FFD0080AFC3 /* PBXTargetDependency */,
+			);
+			name = "Piano-HeroTests";
+			productName = "Piano-HeroTests";
+			productReference = 92A82C8F1CC03FFD0080AFC3 /* Piano-HeroTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		92A82C991CC03FFD0080AFC3 /* Piano-HeroUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 92A82CA91CC03FFD0080AFC3 /* Build configuration list for PBXNativeTarget "Piano-HeroUITests" */;
+			buildPhases = (
+				92A82C961CC03FFD0080AFC3 /* Sources */,
+				92A82C971CC03FFD0080AFC3 /* Frameworks */,
+				92A82C981CC03FFD0080AFC3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				92A82C9C1CC03FFD0080AFC3 /* PBXTargetDependency */,
+			);
+			name = "Piano-HeroUITests";
+			productName = "Piano-HeroUITests";
+			productReference = 92A82C9A1CC03FFD0080AFC3 /* Piano-HeroUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		92A82C701CC03FFD0080AFC3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = UIUC;
+				TargetAttributes = {
+					92A82C771CC03FFD0080AFC3 = {
+						CreatedOnToolsVersion = 7.3;
+					};
+					92A82C8E1CC03FFD0080AFC3 = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = 92A82C771CC03FFD0080AFC3;
+					};
+					92A82C991CC03FFD0080AFC3 = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = 92A82C771CC03FFD0080AFC3;
+					};
+				};
+			};
+			buildConfigurationList = 92A82C731CC03FFD0080AFC3 /* Build configuration list for PBXProject "Piano-Hero" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 92A82C6F1CC03FFD0080AFC3;
+			productRefGroup = 92A82C791CC03FFD0080AFC3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				92A82C771CC03FFD0080AFC3 /* Piano-Hero */,
+				92A82C8E1CC03FFD0080AFC3 /* Piano-HeroTests */,
+				92A82C991CC03FFD0080AFC3 /* Piano-HeroUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		92A82C761CC03FFD0080AFC3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A82C891CC03FFD0080AFC3 /* LaunchScreen.storyboard in Resources */,
+				92A82C861CC03FFD0080AFC3 /* Assets.xcassets in Resources */,
+				92A82C811CC03FFD0080AFC3 /* Main.storyboard in Resources */,
+				92C60F541CCD5CBA00FE9F40 /* measures_2_4.midi in Resources */,
+				929A7FA41CCC1D5D0021507F /* Undertale_-_080_Finale.mid in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A82C8D1CC03FFD0080AFC3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A82C981CC03FFD0080AFC3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		92A82C741CC03FFD0080AFC3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A82C7E1CC03FFD0080AFC3 /* ViewController.swift in Sources */,
+				92A82C7C1CC03FFD0080AFC3 /* AppDelegate.swift in Sources */,
+				92A82CB31CC9A7750080AFC3 /* MIDIParse.swift in Sources */,
+				92A82C841CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld in Sources */,
+				92A82CB11CC0480F0080AFC3 /* BLE-Swift.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A82C8B1CC03FFD0080AFC3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A82C941CC03FFD0080AFC3 /* Piano_HeroTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A82C961CC03FFD0080AFC3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A82C9F1CC03FFD0080AFC3 /* Piano_HeroUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		92A82C911CC03FFD0080AFC3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 92A82C771CC03FFD0080AFC3 /* Piano-Hero */;
+			targetProxy = 92A82C901CC03FFD0080AFC3 /* PBXContainerItemProxy */;
+		};
+		92A82C9C1CC03FFD0080AFC3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 92A82C771CC03FFD0080AFC3 /* Piano-Hero */;
+			targetProxy = 92A82C9B1CC03FFD0080AFC3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		92A82C7F1CC03FFD0080AFC3 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				92A82C801CC03FFD0080AFC3 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		92A82C871CC03FFD0080AFC3 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				92A82C881CC03FFD0080AFC3 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		92A82CA11CC03FFD0080AFC3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		92A82CA21CC03FFD0080AFC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		92A82CA41CC03FFD0080AFC3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = "Piano-Hero/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "uiuc.Piano-Hero";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+			};
+			name = Debug;
+		};
+		92A82CA51CC03FFD0080AFC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = "Piano-Hero/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "uiuc.Piano-Hero";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+			};
+			name = Release;
+		};
+		92A82CA71CC03FFD0080AFC3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = "Piano-HeroTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "uiuc.Piano-HeroTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Piano-Hero.app/Piano-Hero";
+			};
+			name = Debug;
+		};
+		92A82CA81CC03FFD0080AFC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = "Piano-HeroTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "uiuc.Piano-HeroTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Piano-Hero.app/Piano-Hero";
+			};
+			name = Release;
+		};
+		92A82CAA1CC03FFD0080AFC3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "Piano-HeroUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "uiuc.Piano-HeroUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = "Piano-Hero";
+			};
+			name = Debug;
+		};
+		92A82CAB1CC03FFD0080AFC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "Piano-HeroUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "uiuc.Piano-HeroUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = "Piano-Hero";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		92A82C731CC03FFD0080AFC3 /* Build configuration list for PBXProject "Piano-Hero" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92A82CA11CC03FFD0080AFC3 /* Debug */,
+				92A82CA21CC03FFD0080AFC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		92A82CA31CC03FFD0080AFC3 /* Build configuration list for PBXNativeTarget "Piano-Hero" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92A82CA41CC03FFD0080AFC3 /* Debug */,
+				92A82CA51CC03FFD0080AFC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		92A82CA61CC03FFD0080AFC3 /* Build configuration list for PBXNativeTarget "Piano-HeroTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92A82CA71CC03FFD0080AFC3 /* Debug */,
+				92A82CA81CC03FFD0080AFC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		92A82CA91CC03FFD0080AFC3 /* Build configuration list for PBXNativeTarget "Piano-HeroUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92A82CAA1CC03FFD0080AFC3 /* Debug */,
+				92A82CAB1CC03FFD0080AFC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		92A82C821CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				92A82C831CC03FFD0080AFC3 /* Piano_Hero.xcdatamodel */,
+			);
+			currentVersion = 92A82C831CC03FFD0080AFC3 /* Piano_Hero.xcdatamodel */;
+			path = Piano_Hero.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 92A82C701CC03FFD0080AFC3 /* Project object */;
+}
