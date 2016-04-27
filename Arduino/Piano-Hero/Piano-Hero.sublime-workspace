@@ -1,0 +1,846 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"padd",
+				"padding-right"
+			],
+			[
+				"wid",
+				"width"
+			],
+			[
+				"reques",
+				"request"
+			],
+			[
+				"request",
+				"RequestHandler"
+			],
+			[
+				"mar",
+				"margin"
+			],
+			[
+				"tex",
+				"text-align"
+			],
+			[
+				"st",
+				"static"
+			],
+			[
+				"game",
+				"gameID"
+			],
+			[
+				"setTime",
+				"setTimeout"
+			],
+			[
+				"ret",
+				"retVal"
+			],
+			[
+				"tar",
+				"targetID"
+			],
+			[
+				"el",
+				"elif"
+			],
+			[
+				"lobby",
+				"lobbyID"
+			],
+			[
+				"show",
+				"showListGames"
+			],
+			[
+				"lobb",
+				"lobbyID"
+			],
+			[
+				"rgb",
+				"rgbToHex"
+			],
+			[
+				"sele",
+				"selected-color"
+			],
+			[
+				"wo",
+				"word-wrap"
+			],
+			[
+				"pad",
+				"padding-right"
+			],
+			[
+				"over",
+				"overflow"
+			],
+			[
+				"key",
+				"keyCode"
+			],
+			[
+				"do",
+				"document"
+			],
+			[
+				"btn",
+				"btn-default"
+			],
+			[
+				"clear",
+				"clearInterval"
+			],
+			[
+				"sub",
+				"submit-btn-modal-template"
+			],
+			[
+				"mouse",
+				"mouseleave"
+			],
+			[
+				"f",
+				"func"
+			],
+			[
+				"enter",
+				"enterKey"
+			],
+			[
+				"requ",
+				"requirePwd"
+			],
+			[
+				"req",
+				"requirePwd"
+			],
+			[
+				"play",
+				"players-list-list"
+			],
+			[
+				"toggle",
+				"toggleStatic"
+			],
+			[
+				"players",
+				"players-list-list"
+			],
+			[
+				"func",
+				"function"
+			],
+			[
+				"di",
+				"display"
+			],
+			[
+				"leng",
+				"length"
+			],
+			[
+				"listof",
+				"listOfGames"
+			],
+			[
+				"ass",
+				"assignmentFunc"
+			],
+			[
+				"length",
+				"length-1"
+			],
+			[
+				"refre",
+				"refreshPlayerList"
+			],
+			[
+				"background-c",
+				"background-color"
+			],
+			[
+				"color",
+				"colorSelected"
+			],
+			[
+				"ara",
+				"arrayRGB2StrRGB"
+			],
+			[
+				"array",
+				"arrayRGB2StrRGB"
+			],
+			[
+				"back",
+				"background"
+			],
+			[
+				"auto",
+				"autoHide"
+			],
+			[
+				"need",
+				"needDecoding"
+			],
+			[
+				"fun",
+				"function"
+			],
+			[
+				"setTei",
+				"setTimeout"
+			],
+			[
+				"set",
+				"setInputFocusAndEnterKeyCallback"
+			],
+			[
+				"msg",
+				"msgDecoded"
+			],
+			[
+				"las",
+				"colorLastSelectedStr"
+			],
+			[
+				"chat",
+				"chatIncomingMsg"
+			],
+			[
+				"alar",
+				"alertModal"
+			],
+			[
+				"fa",
+				"false"
+			],
+			[
+				"dele",
+				"deleteCookie"
+			],
+			[
+				"modal",
+				"template-modal"
+			],
+			[
+				"getUser",
+				"getUserColor"
+			],
+			[
+				"in",
+				"interface"
+			],
+			[
+				"parse",
+				"parseCookie"
+			],
+			[
+				"margin",
+				"margin-top"
+			],
+			[
+				"marg",
+				"margin-bottom"
+			],
+			[
+				"background-",
+				"background-color"
+			],
+			[
+				"gam",
+				"gameName"
+			],
+			[
+				"ran",
+				"getRandomName"
+			],
+			[
+				"random",
+				"randomNum"
+			],
+			[
+				"name",
+				"nameList"
+			],
+			[
+				"alert",
+				"alertModal"
+			],
+			[
+				"al",
+				"alertModal"
+			],
+			[
+				"userN",
+				"userName"
+			],
+			[
+				"userName",
+				"userNamePrompt"
+			],
+			[
+				"swi",
+				"switchToUserNicknameModal"
+			],
+			[
+				"switchTo",
+				"switchToCreateLobbyModal"
+			],
+			[
+				"join",
+				"joinLobbySubmit"
+			],
+			[
+				"joinLo",
+				"joinLobbyButtonAssignment"
+			],
+			[
+				"swit",
+				"switchToJoinLobbyModal"
+			],
+			[
+				"lobby-list",
+				"lobby-list-modal"
+			],
+			[
+				"str",
+				"strRGB2ArrayRGB"
+			],
+			[
+				"ali",
+				"align-content"
+			],
+			[
+				"sess",
+				"sessionIO"
+			],
+			[
+				"get",
+				"getLocal"
+			],
+			[
+				"alig",
+				"align-self"
+			],
+			[
+				"margin-",
+				"margin-top"
+			],
+			[
+				"align",
+				"align-content"
+			],
+			[
+				"host",
+				"hostGame"
+			],
+			[
+				"as",
+				"assertEqual"
+			],
+			[
+				"test_",
+				"test_board"
+			],
+			[
+				"test",
+				"test_board3"
+			],
+			[
+				"asser",
+				"assertNotEqual"
+			],
+			[
+				"tets",
+				"test_board2"
+			],
+			[
+				"assert",
+				"assertEqual"
+			],
+			[
+				"load",
+				"load_from_dict"
+			],
+			[
+				"piec",
+				"pieces"
+			],
+			[
+				"pie",
+				"pieces"
+			],
+			[
+				"rem",
+				"remove_piece"
+			],
+			[
+				"d",
+				"__dict__"
+			],
+			[
+				"save",
+				"save_to_dict"
+			],
+			[
+				"b",
+				"board"
+			],
+			[
+				"B",
+				"BoardState"
+			],
+			[
+				"dump",
+				"dump_json"
+			],
+			[
+				"loa",
+				"load_json"
+			],
+			[
+				"pi",
+				"Piece"
+			],
+			[
+				"piece",
+				"piece_id"
+			],
+			[
+				"conv",
+				"convert_from_dict"
+			],
+			[
+				"josn",
+				"json_string"
+			],
+			[
+				"json",
+				"json_string"
+			],
+			[
+				"dict",
+				"dict_obj"
+			],
+			[
+				"Http",
+				"HttpResponseRedirect"
+			],
+			[
+				"H",
+				"HttpResponse"
+			],
+			[
+				"list",
+				"listoflobbies"
+			],
+			[
+				"re",
+				"reverse"
+			],
+			[
+				"cur",
+				"curLobby"
+			],
+			[
+				"lo",
+				"lobby_id"
+			],
+			[
+				"lobby_",
+				"lobby_func"
+			],
+			[
+				"user",
+				"username"
+			],
+			[
+				"u",
+				"username"
+			],
+			[
+				"lobbyc",
+				"lobbyCreationForm"
+			],
+			[
+				"create",
+				"createlobby"
+			],
+			[
+				"new",
+				"new_lobby"
+			],
+			[
+				"li",
+				"li	Tag"
+			],
+			[
+				"question",
+				"question_text"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/static/vboard.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/static/menu.js",
+		"/Users/dashen/Desktop/Google/osstatus.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/static/welcome.html",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/socketHandler.pyn",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/launch.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/deck.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/lobby.py",
+		"/Users/dashen/Desktop/Google/test1.py",
+		"/Users/dashen/Desktop/Google/test.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/socket_protocol.txt",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/modules/board_state.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/board_state_reboot.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/socket_protocol_schema.json",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/static/vgng.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/static/video_game_names.txt",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/static/sgbeal-colorpicker.jquery.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot/index.html",
+		"/Users/dashen/Desktop/Google/phoneInterview.py",
+		"/Users/dashen/Desktop/Google/t2.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/test_models.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/tornado_handlers.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/lobby.tpl",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/test_views.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/test_boardstate.py",
+		"/Users/dashen/Downloads/save (2).vb",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/tests/test_boardstate.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/tests/__init__.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/tests.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/modules/message_buffer.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/src/main/js/vboard.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/urls.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/models.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/lobbylist.tpl",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/static/lobbyList.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/views.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/launch.py",
+		"/Users/dashen/Downloads/save.vb",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/validate.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/modules/lobby_func.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/base.tpl",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/static/chat.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/tests/frontendtests.html",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/static/tests/lobby_test.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/createlobby.tpl",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/static/lobby.css",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/frontendtests/lobby_test.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/tests/lobby_test.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/static/chai.js",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/tests/frontendTests.html",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/static/main.css",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/403.tpl",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/forms.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/modules/__init__.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/lobby.tpl",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/polls/index.html",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/polls/detail.html",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/polls/views.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/polls/models.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/virtualboard/web/template/web/accountform.tpl",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/polls/admin.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/mysite/settings.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/polls/urls.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/mysite/urls.py",
+		"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/test/mysite/mysite/urls"
+	],
+	"find":
+	{
+		"height": 25.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"/Users/dashen/Dropbox/DA/Academic/H - Spring 2016/CS428/virtualboard/reboot",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"piece",
+			"generate",
+			"deck",
+			"cards",
+			"object",
+			"e8",
+			"sent one note",
+			"beacon",
+			"channel: 1",
+			"UP",
+			"Toggle",
+			"template-modal",
+			"init",
+			"icon",
+			"setBackground",
+			"precision",
+			"3",
+			"renderInit",
+			"chatIncomingMsg",
+			"0.8",
+			"loadBoardState",
+			"quickStarted",
+			"setCameraPerspective",
+			"actionManager",
+			"vb.scene",
+			"vb.",
+			"chatInit",
+			"keycode",
+			"enter",
+			"chatini",
+			"onPointerDown",
+			"last",
+			"1",
+			"password",
+			"gameIDExists",
+			"setInputFocusAndEnterKeyCallback",
+			"resumeButtonInit",
+			"Games",
+			"games",
+			"Games",
+			"games",
+			"password",
+			"gameIDExists",
+			"switchToResumeGameModal",
+			"resume",
+			"listGames",
+			"resumeButtonInit",
+			"games",
+			"games.",
+			"games",
+			"iteritems",
+			"gameIDExists",
+			"iteritems",
+			"Games",
+			"games",
+			"iteritems",
+			"listGames",
+			"message_all",
+			"connect",
+			"Connect",
+			"connect",
+			"autoGameListIntervalID",
+			"listGames",
+			"strRGB2HexRGB",
+			"colorPickerInit",
+			"colorpicker",
+			".css",
+			"animate",
+			"toggleRightPanel",
+			"sleep",
+			"alert",
+			"count",
+			"9",
+			"button",
+			":",
+			"animate",
+			"model-template-alert",
+			"promise",
+			"model-template-alert",
+			"#model-template-alert",
+			"model-template-alert",
+			"#model-template-alert",
+			"model-template-alert",
+			"ul",
+			"lobby-list",
+			"list-group",
+			"overflow",
+			"toggleRightPanel",
+			"autoGameListIntervalID",
+			"refresh",
+			"listGames",
+			"clearInterval",
+			"setTemplateModalAlert",
+			"template-modal",
+			"clearTemplateModalAlert",
+			"TemplateModalAlert",
+			"alert",
+			"chatinit",
+			"toggleRightPanel",
+			".show();",
+			"click();",
+			"toggleRightPanel",
+			"setInputFocusAndEnterKeyCallback",
+			"clear",
+			".show()",
+			"$(\"#players-list\").show()",
+			"toggleRightPanel",
+			"right",
+			"toggleRightPanel",
+			"#right-panel",
+			"right-panel",
+			"toggleRightPanel",
+			"event",
+			"listgames",
+			"enterKey",
+			"skipFocus",
+			"setInputFocusAndEnterKeyCallback",
+			"joinGame",
+			"joinlobby",
+			"password",
+			"joinLobbyRequest",
+			"setInputFocusAndEnterKeyCallback",
+			"hide",
+			"setInputFocusAndEnterKeyCallback",
+			"focus",
+			"switchToJoinLobbyModal",
+			"requirePwd",
+			"switchToJoinLobbyModal"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"this.",
+			"	",
+			"    "
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "Piano-Hero.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

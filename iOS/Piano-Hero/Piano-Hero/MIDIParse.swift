@@ -366,15 +366,7 @@ class CentralControl {
         return false
     }
     
-    // this uses millisecond
-    func delay(delay:UInt64, closure:()->()) {
-        dispatch_after(
-            dispatch_time(
-                DISPATCH_TIME_NOW,
-                Int64(delay/1000 * NSEC_PER_SEC)
-            ),
-            dispatch_get_main_queue(), closure)
-    }
+
     
     // DEBUG function
     // Reference: https://github.com/genedelisa/MusicSequence/blob/master/MusicSequence/MIDISequence.swift

@@ -1,59 +1,67 @@
 /*  
  *   Piano Hero
+ *
  *  Anthony Venen & Da Shen @ UIUC March 2016
  */
  
-#include <PinChangeInt.h>
-
-#include <LiquidCrystal.h>
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_TFTLCD.h> // Hardware-specific library
-
-
-#define LCD_CS A3 // Chip Select goes to Analog 3
-#define LCD_CD A2 // Command/Data goes to Analog 2
-#define LCD_WR A1 // LCD Write goes to Analog 1
-#define LCD_RD A0 // LCD Read goes to Analog 0
-#define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
-
-Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
-
-// Assign human-readable names to some common 16-bit color values:
-#define  BLACK   0x0000
-#define BLUE    0x001F
-#define RED     0xF800
-#define GREEN   0x07E0
-#define CYAN    0x07FF
-#define MAGENTA 0xF81F
-#define YELLOW  0xFFE0
-#define WHITE   0xFFFF
-
-#define DEBUG_MODE 1
-
-#define BLEmini Serial1
-
-#define MAX_MIDI_EVENTS 4500
-
-typedef struct {
-  // digits 00 - time, 
-  // 01 - note on, 11 - note off
-  uint8_t data; 
-} MIDIEvent;
 /*
  * 
  * AtMega2560 Datasheet
  * http://www.atmel.com/images/atmel-2549-8-bit-avr-microcontroller-atmega640-1280-1281-2560-2561_datasheet.pdf
  * https://arduino-info.wikispaces.com/MegaQuickRef
  */
-unsigned long previousMillis = 0;
-unsigned long previousMillis_MIDI = 0;
-unsigned long previousMillis_metronome = 0;
+
+#include <PinChangeInt.h>
+#include <LiquidCrystal.h>
+
+typedef uint8_t MIDIEvent;
+
+static bool ran_once_flag = false;
+
+#define DEBUG_MODE 1
+#define BLEmini Serial1
+#define MAX_MIDI_EVENTS 4500
+
+//  Bluetooth Protocol 
+//Arduino -> iPhone
+#define RESP_ACKNOWLEDGE 0xE5
+#define RESP_DECLINE 0xE6
+#define RESP_START_CONNECTION 0xE7
+#define RESP_END_CONNECTION 0xE8
+#define RESP_START_PLAYBACK 0xE9
+#define RESP_END_PLAYBACK 0xEA
+#define RESP_TOGGLE_METRONOME 0xEB
+
+#define RESP_TEMP_ADJUST_FAST 0xA1
+#define RESP_TEMP_ADJUST_DOWN 0xA0
+
+//Arduino <- iPhone
+#define FUNC_START_LOADING 0x97
+#define FUNC_STOP_LOADING 0x98
+#define FUNC_START_OF_DATA_TRANSMISSION 0x99
+#define FUNC_END_OF_DATA_TRANSMISSION 0x9A
+#define FUNC_START_PLAYBACK 0x9B
+#define FUNC_PAUSE_PLAYBACK 0x9C
+#define FUNC_TOGGLE_METRONOME 0x9D
+#define FUNC_METRONOME_VOL_UP 0x9E
+#define FUNC_METRONOME_VOL_DOWN 0x9F
+#define FUNC_CLR_SCREEN 0xAF
+#define FUNC_TEMP_ADJUST_UP 0x91
+#define FUNC_TEMP_ADJUST_DOWN 0x90
+
+// Other
+#define END_OF_MIDI_STREAM 0x8B
+
+// Time Markers
+unsigned long previous_millis_CLK = 0;
+unsigned long previous_millis_MIDI = 0;
+unsigned long previous_millis_metronome = 0;
 unsigned long curEventInterval_MIDI = 0;
 
 //Adjust this value to change the sensitivity of the piezos
-const int PIEZO_THRESHOLD = 5;
+const int PIEZO_THRESHOLD = 55;
 
-//  ==== Pin Assignment =====
+//  =============== Pin Assignment ===============
 // LED Array - LEDs
 const int8_t METRONOME =  13;
 const int8_t SCREEN_DATA0 = 30;
@@ -78,56 +86,80 @@ const int8_t PIEZO_C = 27;
 const int8_t PIEZO_B = 28;
 const int8_t PIEZO_A = 29;
 
+const int8_t SLOW_SRCLK = 40;
+const int8_t SLOW_RCLK = 41;
+const int8_t SLOW_SRCLR = 42;  // set high by defualt
+const int8_t FAST_SRCLK = 43;
+const int8_t FAST_RCLK = 44;
+const int8_t FAST_SRCLR = 45;  // set high by default
 
+// Interrup pins
+const int8_t ROTARY_A = 47;
+const int8_t ROTARY_B = 48;
+const int8_t ROTARY_PRESS = 49;
 
-static int8_t SLOW_SRCLK = 40;
-static int8_t SLOW_RCLK = 41;
-static int8_t SLOW_SRCLR = 42;  // set high
-static int8_t FAST_SRCLK = 43;
-static int8_t FAST_RCLK = 44;
-static int8_t FAST_SRCLR = 45;  // set high
-
-// TODO: interrup pins
-static int8_t ROTARY_A = 47;
-static int8_t ROTARY_B = 48;
-static int8_t ROTARY_PRESS = 49;
-
-static int8_t GND_PIN1 = 50;
-static int8_t GND_PIN2 = 51;
-static int8_t GND_PIN3 = 52;
-
+const int8_t GND_PIN1 = 50;
+const int8_t GND_PIN2 = 51;
+const int8_t GND_PIN3 = 52;
 
 const int8_t PIEZO_DATA_IN1 = A15;
 const int8_t PIEZO_DATA_IN2 = A14;
 const int8_t PIEZO_DATA_IN3 = A13;
 const int8_t PIEZO_DATA_IN4 = A12;
 const int8_t PIEZO_DATA_IN5 = A11;
-const int8_t output_pins[] = {METRONOME,SCREEN_DATA0,SCREEN_DATA1,
-SCREEN_DATA2,SCREEN_DATA3,SCREEN_DATA4,SCREEN_DATA5,SCREEN_DATA6,
-SCREEN_DATA7,SCREEN_EN,SCREEN_RW,SCREEN_RS,LED_DATA1,LED_DATA2,LED_DATA3,
-LED_DATA4,LED_DATA5,PIEZO_C,PIEZO_B,PIEZO_A,SLOW_SRCLK,SLOW_RCLK,
-SLOW_SRCLR,FAST_SRCLK,FAST_RCLK,FAST_SRCLR,GND_PIN1,GND_PIN2,GND_PIN3};
 
-const int8_t input_pins[] = {PIEZO_DATA_IN1,PIEZO_DATA_IN2,
-    PIEZO_DATA_IN3,PIEZO_DATA_IN4,PIEZO_DATA_IN5};
+const int8_t output_pins[] = {
+  METRONOME,
+  SCREEN_DATA0, SCREEN_DATA1, SCREEN_DATA2, SCREEN_DATA3,
+  SCREEN_DATA4, SCREEN_DATA5, SCREEN_DATA6, SCREEN_DATA7, 
+  SCREEN_EN, SCREEN_RW,SCREEN_RS,
+  LED_DATA1, LED_DATA2, LED_DATA3, LED_DATA4, LED_DATA5, 
+  PIEZO_C, PIEZO_B, PIEZO_A, 
+  SLOW_SRCLK, SLOW_RCLK, SLOW_SRCLR, 
+  FAST_SRCLK, FAST_RCLK, FAST_SRCLR, 
+  GND_PIN1, GND_PIN2, GND_PIN3
+};
 
+const int8_t input_pins[] = {
+  PIEZO_DATA_IN1, PIEZO_DATA_IN2, PIEZO_DATA_IN3, PIEZO_DATA_IN4, PIEZO_DATA_IN5};
 
-// ===== Encoder ======
+// ==================== DATA ====================
+
+// ===== DATA ===== Rotary Encoder ======
 // adapted from http://bildr.org/2012/08/rotary-encoder-arduino/
 volatile int lastEncoded = 0;
 volatile long encoderValue = 0;
 
-long lastencoderValue = 0;
-int lastMSB = 0;
-int lastLSB = 0;
+static long lastencoderValue = 0;
+static int lastMSB = 0;
+static int lastLSB = 0;
 
-// ===== LCD Screen =====
+// ===== DATA ===== Piezo Sensors ======
+//triggered values
+volatile int trigger_value[5][8] = {{0}, {0}, {0}, {0}, {0}};
+static int current_column = 0;
+
+// ===== DATA ===== LCD Screen =====
 LiquidCrystal lcd(SCREEN_RS, SCREEN_EN, SCREEN_DATA4, SCREEN_DATA5, SCREEN_DATA6, SCREEN_DATA7);
 
+// ===== DATA ===== Bluetooth =====
+volatile static byte incomingByte = 0;
 
-// ===== Finite State Machine =====
+// ===== DATA ===== MIDI =====
+MIDIEvent MIDI_events[MAX_MIDI_EVENTS] = {0};
+int MIDI_events_write_idx = 0;
 
-// time read state: 0 - not read/initial, 1 - already read time
+
+// ===== DATA ===== DEBUG =====
+#if DEBUG_MODE
+static int count = 0;
+#endif
+
+// =============== Finite State Machine(FSM) ===============
+
+// time read state: 
+//  0 - not read/initial
+//  1 - already read time
 static uint8_t time_read_state = 0;
 
 // metronome state: 0 - init, 1 -> 3 -  wait, 4 - fire
@@ -138,68 +170,24 @@ static uint8_t metronome_volume = 50;
 static double tempo_factor = 1.0;
 
 // setting state
-// 0 - volume
-// 1 - tempo speed
+//  0 - volume
+//  1 - tempo speed
 static volatile uint8_t setting_state = 0;
 
-
 // SYS state:
-// 0 - initial state/normal
-// 1 - loading state
-// 2 - playback state
+//  0 - initial state/normal
+//  1 - loading state
+//  2 - playback state
 static volatile uint8_t SYS_state = 0;
 
 // BT state
-// 0 - wait for init, 1 - wait for value, 
+//  0 - wait for init, 
+//  1 - wait for value, 
 static int8_t BT_state = 0; 
-volatile static byte incomingByte = 0;
-static int count = 0;
 
-// Bluetooth Protocol
-//Arduino -> iPhone
-#define RESP_ACKNOWLEDGE 0xE5
-#define RESP_DECLINE 0xE6
-#define RESP_START_CONNECTION 0xE7
-#define RESP_END_CONNECTION 0xE8
-#define RESP_START_PLAYBACK 0xE9
-#define RESP_END_PLAYBACK 0xEA
-#define RESP_TOGGLE_METRONOME 0xEB
-//#define RESP_METRONOME_VOL_UP 0xED
-//#define RESP_METRONOME_VOL_DOWN 0xEE
-#define RESP_TEMP_ADJUST_FAST 0xA1
-#define RESP_TEMP_ADJUST_DOWN 0xA0
-
-//Arduino <- iPhone
-#define FUNC_START_LOADING 0x97
-#define FUNC_STOP_LOADING 0x98
-#define FUNC_START_OF_DATA_TRANSMISSION 0x99
-#define FUNC_END_OF_DATA_TRANSMISSION 0x9A
-#define FUNC_START_PLAYBACK 0x9B
-#define FUNC_PAUSE_PLAYBACK 0x9C
-#define FUNC_TOGGLE_METRONOME 0x9D
-#define FUNC_METRONOME_VOL_UP 0x9E
-#define FUNC_METRONOME_VOL_DOWN 0x9F
-#define FUNC_CLR_SCREEN 0xAF
-#define FUNC_TEMP_ADJUST_UP 0x91
-#define FUNC_TEMP_ADJUST_DOWN 0x90
-
-
-
-
-// -------- test ---------
-//triggered values
-volatile int trigger_value[5][8] = {{0},{0},{0},{0},{0}};
-
-static int current_column = 0;
-
-
-
-
-
- /* ================ HELPER FUNCTIONS ================ 
- * 
- */
-
+// ================ HELPER FUNCTIONS ================ 
+ 
+// MIDI note number to Music Note name
 // adapted from:
 // http://ericjknapp.com/blog/2014/04/13/midi-notes/
 const char * noteForMidiNumber(int midiNumber) {
@@ -216,10 +204,6 @@ const char * noteForMidiNumber(int midiNumber) {
   return noteArraySharps[midiNumber];
 }
 
-void light_up_LED_column(int col_num) {
-   
-}
-
 void piezo_interrupt_handler(){
   piezo_loop(input_pins);
 }
@@ -229,65 +213,61 @@ void piezo_loop(const int8_t piezo_data_pins[]) {
     digitalWrite(PIEZO_C, (i >> 2) & 0x01);
     digitalWrite(PIEZO_B, (i >> 1) & 0x01);
     digitalWrite(PIEZO_A, i & 0x01);
-//    Serial.print("cur num: ");
-//    Serial.println(i);
-//    Serial.println(C);
-//    Serial.println(B);
-//    Serial.println(A);
+
     for(int j = 0;j<5;j++){
       trigger_value[j][i] = analogRead(piezo_data_pins[j]);
-      if(trigger_value[j][i] > PIEZO_THRESHOLD+50) {
+      if(trigger_value[j][i] > PIEZO_THRESHOLD) {
         trigger_value[j][i] = 0;
+
+#if DEBUG_MODE
         Serial.print("knock detected: ");
-//        Serial.println(j*8+i+1);
         Serial.println(noteForMidiNumber((j*8+i+1) + 47));
-        // should let other program do things
+#endif
       }
     }
   }
 }
-
-
-
 
 /*
  * =============== MAIN FUNCTION LOOP ==============
  */
 static bool clear_bit_shifter = true;
 
-void setup() {
-//  lcd.begin(16,2);
-  uint16_t identifier = tft.readID();
-  identifier=0x9341;
-  tft.begin(identifier);
-  
-  if(DEBUG_MODE){
-    Serial.begin(57600);
-    Serial.println("Setup Arduino...");
-  }
-  
-//  Serial.print(sizeof(output_pins)/sizeof(int));
+void setup() {  
+#if DEBUG_MODE
+      Serial.begin(57600);
+      Serial.println("Setup Arduino...");
+#endif  
   int8_t num_outputs = sizeof(output_pins);
   int8_t num_inputs = sizeof(input_pins);
   // init output pins
+#if DEBUG_MODE
   Serial.println();
   Serial.print("init output pins: ");
+#endif
+
   for(int i = 0; i < num_outputs;i++){
     pinMode(output_pins[i], OUTPUT);
-    Serial.print(" ");
-    Serial.print(output_pins[i]);
+#if DEBUG_MODE
+      Serial.print(" ");
+      Serial.print(output_pins[i]);
+#endif
   }
   // init input pins (as interrupts)
+#if DEBUG_MODE
   Serial.println("");
   Serial.print("init input pins: ");
+#endif
   for(int i = 0; i < num_inputs;i++){
     pinMode(input_pins[i], INPUT);
+#if DEBUG_MODE
     Serial.print(" ");
     Serial.print(input_pins[i]);
-    attachPinChangeInterrupt(input_pins[i],piezo_interrupt_handler,RISING);
+#endif
+    // PCintPort::attachPinChangeInterrupt(input_pins[i],piezo_interrupt_handler,RISING);
   }
 
-// set rotary encoder
+  // set rotary encoder
   pinMode(ROTARY_A,INPUT);
   pinMode(ROTARY_B,INPUT);
   pinMode(ROTARY_PRESS,INPUT);
@@ -296,9 +276,10 @@ void setup() {
   digitalWrite(ROTARY_PRESS,HIGH);
   PCintPort::attachInterrupt(ROTARY_A, updateEncoder, CHANGE);
   PCintPort::attachInterrupt(ROTARY_B, updateEncoder, CHANGE);
-  PCintPort::attachInterrupt(ROTARY_PRESS, updateSettingState, CHANGE);
-  
+  PCintPort::attachInterrupt(ROTARY_PRESS, updateRotarySettingState, CHANGE);
+#if DEBUG_MODE
   Serial.println();
+#endif
   BLEmini.begin(57600);
 
   // CLR bit shifter
@@ -337,15 +318,15 @@ void setup() {
 // 14 - FAST_SRCLK down, FAST_RCLK up
 // 15 - FAST_SRCLK up, FAST_RCLK down
 // 16 - FAST_SRCLK down, FAST_RCLK up
+// other - pause state
 //  --- set CLK frequency here ---
-static int slow_freq = 8 * tempo_factor; // 16th note time = 60/120/4 = 0.125s ~ 8Hz
-static int freq_metronome = slow_freq/4;
+static int slow_clk_freq = 8 * tempo_factor; // 16th note time = 60/120/4 = 0.125s ~ 8Hz
+static int freq_metronome = slow_clk_freq/4;
 static int delay_time_metronome = 1000/freq_metronome/2;
 static int on_time_metronome = 20;
 
-static unsigned int CLK_state = 0;
-static int delay_time = 1000/slow_freq/2/8;
-static bool start_clk_flag = false;
+static uint16_t CLK_state = 0;
+static int delay_time = 1000/slow_clk_freq/2/8;
 static bool pause_clk_flag = false;
 static char LED_data[5] = {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000};
 bool dim_light[5] = {false};
@@ -365,7 +346,7 @@ void CLK_GEN_helper() {
         analogWrite(METRONOME,metronome_volume);
         metronome_turn_off_flag = true;
       }
-      previousMillis_metronome = millis();
+      previous_millis_metronome = millis();
     } else if(metronome_state == 5){
       metronome_state = 1;
     }
@@ -378,52 +359,40 @@ void CLK_GEN_helper() {
   if(CLK_state % 2 != 0){
     digitalWrite(FAST_SRCLK, HIGH);
     digitalWrite(FAST_RCLK, LOW);
-//    if(start_clk_flag){
       for(int i = 0; i < 5; i++){
         if((LED_data[i] >> (9-(17-CLK_state)/2)) & (0x1) == 1){
-//          Serial.print(CLK_state);
-//          Serial.print("  light up!! ");
-//          Serial.println(LED_data_pin[i]);
           dim_light[i] = true;
           digitalWrite(LED_data_pin[i],HIGH);
         }
       }
-//    }
   } else {
     digitalWrite(FAST_SRCLK, LOW);
     digitalWrite(FAST_RCLK, HIGH); 
-//    if(start_clk_flag){
       for(int i = 0; i < 5; i++){
         if(dim_light[i]){
-//          Serial.print(CLK_state);
-//          Serial.print("  dim down!! ");
-//          Serial.println(LED_data_pin[i]);
           dim_light[i] = false;
           digitalWrite(LED_data_pin[i],LOW);
         }
       } 
-//    }
   }
   
-  previousMillis = millis();
-  CLK_state *= 100;
+  previous_millis_CLK = millis();
+  CLK_state *= 100; // make the state 
 }
 
-// Synchronous Clock Generator
+// Asynchronous Clock Generator
+// metronome is kept in sync with the clk
 void CLK_GEN() {
   if(metronome_turn_off_flag){
-    if(millis() - previousMillis_metronome > on_time_metronome){
+    if(millis() - previous_millis_metronome > on_time_metronome){
       analogWrite(METRONOME,0);
       metronome_turn_off_flag = false;
     }
   }
-  if (CLK_state == 0){
-    if(start_clk_flag){
-        CLK_state = 1;
-    }
+  if (CLK_state == 0 && !pause_clk_flag) {
+    CLK_state = 1;
   } else if (CLK_state > 16) {
-    unsigned long currentMillis = millis();
-    if(currentMillis - previousMillis >= delay_time){
+    if(millis() - previous_millis_CLK >= delay_time){
       CLK_state = CLK_state/100 + 1;
       if(CLK_state == 17) CLK_state = 1;
     }
@@ -441,8 +410,8 @@ void updateEncoder(){
 
   int prev_encoder_value = encoderValue;
 
-  if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) encoderValue ++;
-  if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) encoderValue --;
+  if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) encoderValue++;
+  if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) encoderValue--;
 
   if(encoderValue - prev_encoder_value > 0){ // CW
     if(setting_state == 0){ // volume up
@@ -455,10 +424,10 @@ void updateEncoder(){
       if(SYS_state != 1){
         if(tempo_factor + 0.1 < 2.0){
           tempo_factor += 0.1;
-          slow_freq = 8 * tempo_factor;
-          freq_metronome = slow_freq/4;
+          slow_clk_freq = 8 * tempo_factor;
+          freq_metronome = slow_clk_freq/4;
           delay_time_metronome = 1000/freq_metronome/2;
-          delay_time = 1000/slow_freq/2/8;
+          delay_time = 1000/slow_clk_freq/2/8;
         }
       }
     }
@@ -473,10 +442,10 @@ void updateEncoder(){
       if(SYS_state != 1){
         if(tempo_factor - 0.1 > 0.3){
           tempo_factor -= 0.1;
-          slow_freq = 8 * tempo_factor;
-          freq_metronome = slow_freq/4;
+          slow_clk_freq = 8 * tempo_factor;
+          freq_metronome = slow_clk_freq/4;
           delay_time_metronome = 1000/freq_metronome/2;
-          delay_time = 1000/slow_freq/2/8;
+          delay_time = 1000/slow_clk_freq/2/8;
         }
       }
     }
@@ -486,7 +455,7 @@ void updateEncoder(){
 }
 
 
-void updateSettingState(){
+void updateRotarySettingState(){
   int value_read = digitalRead(ROTARY_PRESS);
   if(!value_read){ //button is  pushed
     if(setting_state == 0){
@@ -517,85 +486,106 @@ void clear_screen(bool clearScr) {
  * 
  */
 
+enum MIDIEventType {
+  MIDI_TIME_EVENT,
+  MIDI_NOTE_ON_EVENT,
+  MIDI_FUNC_CODE_EVENT,
+  MIDI_NOTE_OFF_EVENT
+};
 
 
-MIDIEvent MIDI_events[MAX_MIDI_EVENTS] = {0};
-int MIDI_events_write_idx = 0;
-
-uint8_t noteType(MIDIEvent e) {
-  return ((e.data >> 6) & 0b11);
+uint8_t note_type(MIDIEvent e) {
+  return (e >> 6) & 0b11;
 }
-uint8_t noteContent(MIDIEvent e) {
-  return ((e.data) & 0x3F);
+uint8_t note_content(MIDIEvent e) {
+  return e & 0x3F;
 }
+
+// MIDIEventType note_type(MIDIEvent e) {
+//   return (e >> 6) & 0b11;
+// }
+// MIDIEventType note_content(MIDIEvent e) {
+//   return e & 0x3F;
+// }
 
 void play_next_MIDI_event() {
-  // when no time is read
+  if(MIDI_events[MIDI_events_write_idx] == END_OF_MIDI_STREAM) {
+    SYS_state = 0;
+    BLEmini.write(RESP_END_PLAYBACK);
+    return;
+  }
+
+  // start reading time bytes
   if(time_read_state == 0){
     // when it reaches the end of the buffer
-    if((MIDI_events_write_idx >1) && (MIDI_events[MIDI_events_write_idx].data == 0)) {
-      SYS_state = 0;
-      BLEmini.write(RESP_END_PLAYBACK);
-      return;
-    }
-    // and current pointer is time note
-    else if ( noteType(MIDI_events[MIDI_events_write_idx]) ==  0b00) {
+    
+    // current pointer is time note, read both them
+    if ( note_type(MIDI_events[MIDI_events_write_idx]) ==  MIDI_TIME_EVENT) {
       
-      uint16_t p1 = noteContent(MIDI_events[MIDI_events_write_idx]);
-      uint16_t p2 = noteContent(MIDI_events[MIDI_events_write_idx+1]);
+      uint16_t p1 = note_content(MIDI_events[MIDI_events_write_idx]);
+      uint16_t p2 = note_content(MIDI_events[MIDI_events_write_idx+1]);
       curEventInterval_MIDI = ((p1 << 6) | p2)/tempo_factor;
+#if DEBUG_MODE
       Serial.print(curEventInterval_MIDI);
       Serial.print(" ");
+#endif
       time_read_state = 1;
+      // skip the second time byte
       MIDI_events_write_idx += 2;
     }
-  } else if (time_read_state == 1 && (millis() - previousMillis_MIDI) >= curEventInterval_MIDI) {  // when time is already read, read notes on/off info
-    previousMillis_MIDI = millis();
+  } else if (time_read_state == 1 && (millis() - previous_millis_MIDI) >= curEventInterval_MIDI) {  // when time is already read, read notes on/off info
+    previous_millis_MIDI = millis();
     // when not finishing read the notes
     while(time_read_state == 1) {
-      if(noteContent(MIDI_events[MIDI_events_write_idx]) == 0) {
+#if DEBUG_MODE
+      Serial.print(note_content(MIDI_events[MIDI_events_write_idx]),DEC);
+      Serial.print(" ");
+#endif
+      if (note_type(MIDI_events[MIDI_events_write_idx]) == MIDI_NOTE_ON_EVENT) { // on
+        turn_on_note_num(note_content(MIDI_events[MIDI_events_write_idx]));
+      } else if (note_type(MIDI_events[MIDI_events_write_idx]) == MIDI_NOTE_OFF_EVENT) { // off
+        turn_off_note_num(note_content(MIDI_events[MIDI_events_write_idx]));
+      }
+  
+      // move to the next 
+      MIDI_events_write_idx += 1;
+      if(note_type(MIDI_events[MIDI_events_write_idx]) == MIDI_TIME_EVENT){
         time_read_state = 0;
-        break;
-      } else{
-        Serial.print(noteContent(MIDI_events[MIDI_events_write_idx]),DEC);
-        Serial.print(" ");
-        if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b01) { // on
-          turnOnNote(noteContent(MIDI_events[MIDI_events_write_idx]));
-        } else if (noteType(MIDI_events[MIDI_events_write_idx]) == 0b11) { // off
-          turnOffNote(noteContent(MIDI_events[MIDI_events_write_idx]));
-        }
-    
-        // finished reading the current note
-        MIDI_events_write_idx += 1;
-        if(noteType(MIDI_events[MIDI_events_write_idx]) == 0b00){
-          time_read_state = 0;
-//          Serial.println(" ");
-        }
+#if DEBUG_MODE
+         Serial.println(" ");
+#endif
+      } 
+      // when run into the end of file
+      if(note_content(MIDI_events[MIDI_events_write_idx]) == 0 || MIDI_events[MIDI_events_write_idx] == END_OF_MIDI_STREAM) {
+        time_read_state = 0;
+        SYS_state = 0;
+        BLEmini.write(RESP_END_PLAYBACK);
+        return;
       }
     }
-    
+
+#if DEBUG_MODE
     // display keys
     for(int i = 0;i<5;i++){
-      printChar(LED_data[i]);
+      print_char(LED_data[i]);
     }
     Serial.println("");
-
+#endif
   }
+
   
 }
 
 // n starts from 1 to 36
-void turnOnNote(char n) {
+void turn_on_note_num(char n) {
   if(n == 0) {
     return;
   }
   char idx = (n-1)/8;
   LED_data[idx] = LED_data[idx] | (1 << (8-(n%8)));
 
-  //DEBUG
-//  count++;
 }
-void turnOffNote(char n) {
+void turn_off_note_num(char n) {
   if(n == 0) {
     return;
   }
@@ -603,64 +593,83 @@ void turnOffNote(char n) {
   LED_data[idx] = LED_data[idx] & (~(1 << (8-(n%8))));
 }
 
-void printChar(char n) {
+void print_char(char n) {
   for(int i = 0; i < 8; i++){
     Serial.print((n >> (7-i)) & 0x1);
   }
 }
 
-
-
-void BTHandler() {
+// Bluetooth Message Handler
+void bt_msg_handler() {
   switch (incomingByte) {
+    // Start Loading MIDI Data
     case FUNC_START_LOADING:
       if(SYS_state == 0){
-//        start_clk_flag = true;
         BLEmini.write(RESP_START_CONNECTION);
         SYS_state = 1;
+#if DEBUG_MODE
         Serial.println("FUNC_START_LOADING");
         Serial.println(count);
+#endif
       }
       break;
+
+    // Stop Loading MIDI Data
     case FUNC_STOP_LOADING:
       if(SYS_state == 1){
-        start_clk_flag = false;
         BLEmini.write(RESP_END_CONNECTION);
         SYS_state = 0;
+
+        // add a eof at the end of the file
+        MIDI_events[MIDI_events_write_idx++] = END_OF_MIDI_STREAM;
+#if DEBUG_MODE
         Serial.println("FUNC_STOP_LOADING");
         Serial.println(count);
-        MIDI_events_write_idx = 0;
         count = 0;
-        start_clk_flag = true;
+#endif
+        MIDI_events_write_idx = 0;
       }
       break;
+
+    // Head Byte of large byte package
     case FUNC_START_OF_DATA_TRANSMISSION:
       BT_state = 1;
       break;
+    // Tail Byte of larget byte package
     case FUNC_END_OF_DATA_TRANSMISSION:
       BT_state = 0;
       BLEmini.write(RESP_ACKNOWLEDGE);
+#if DEBUG_MODE
       count++;
+#endif
       break;
+
+    // Start Playing Back
     case FUNC_START_PLAYBACK:
       if(SYS_state == 0){
         pause_clk_flag = false;
-        start_clk_flag = true;
         SYS_state = 2;
 //        MIDI_events_write_idx = 0;
         BLEmini.write(RESP_START_PLAYBACK);
+#if DEBUG_MODE
         Serial.println("FUNC_START_PLAYBACK");
+#endif
       }
       break;
+
+    // Pause Playing Back
     case FUNC_PAUSE_PLAYBACK:
       if(SYS_state == 2){
         pause_clk_flag = true;
-        start_clk_flag = false;
         SYS_state = 0;
         BLEmini.write(RESP_END_PLAYBACK);
+#if DEBUG_MODE
         Serial.println("FUNC_END_PLAYBACK");
+#endif
       }
       break;
+
+    // Toggle Metronome Beats
     case FUNC_TOGGLE_METRONOME:
       if(SYS_state == 2){
         if(metronome_enabled){
@@ -669,8 +678,12 @@ void BTHandler() {
           metronome_enabled = true;
         }
         BLEmini.write(RESP_TOGGLE_METRONOME);
+#if DEBUG_MODE
         Serial.println("RESP_TOGGLE_METRONOME");
+#endif
       }
+
+    // Metronome Volume UP
     case FUNC_METRONOME_VOL_UP:
       if(int(metronome_volume) + 20 > 250){
         metronome_volume = 250;
@@ -678,8 +691,12 @@ void BTHandler() {
         metronome_volume += 20;
       }
       BLEmini.write(RESP_ACKNOWLEDGE);
+#if DEBUG_MODE
       Serial.println("FUNC_METRONOME_VOL_UP");
+#endif
       break;
+
+    // Metronome Volume Down
     case FUNC_METRONOME_VOL_DOWN:
       if(int(metronome_volume) - 20 < 0){
         metronome_volume = 0;
@@ -687,18 +704,22 @@ void BTHandler() {
         metronome_volume -= 20;
       }
       BLEmini.write(RESP_ACKNOWLEDGE);
+#if DEBUG_MODE
       Serial.println("FUNC_METRONOME_VOL_DOWN");
+#endif
       break;
     case FUNC_TEMP_ADJUST_UP:
       if(SYS_state != 1){
         if(tempo_factor + 0.1 < 2.0){
           tempo_factor += 0.1;
-          slow_freq = 8 * tempo_factor;
-          freq_metronome = slow_freq/4;
+          slow_clk_freq = 8 * tempo_factor;
+          freq_metronome = slow_clk_freq/4;
           delay_time_metronome = 1000/freq_metronome/2;
-          delay_time = 1000/slow_freq/2/8;
+          delay_time = 1000/slow_clk_freq/2/8;
         }
+#if DEBUG_MODE
         Serial.println("FUNC_TEMP_ADJUST_UP");
+#endif
       }
       
       BLEmini.write(RESP_ACKNOWLEDGE);
@@ -707,17 +728,19 @@ void BTHandler() {
       if(SYS_state != 1){
         if(tempo_factor - 0.1 > 0.3){
           tempo_factor -= 0.1;
-          slow_freq = 8 * tempo_factor;
-          freq_metronome = slow_freq/4;
+          slow_clk_freq = 8 * tempo_factor;
+          freq_metronome = slow_clk_freq/4;
           delay_time_metronome = 1000/freq_metronome/2;
-          delay_time = 1000/slow_freq/2/8;
+          delay_time = 1000/slow_clk_freq/2/8;
         }
+#if DEBUG_MODE
         Serial.println("FUNC_TEMP_ADJUST_DOWN");
+#endif
       }
       
       BLEmini.write(RESP_ACKNOWLEDGE);
       break;
-    default:
+    default:  // General Data Bytes
 //      Serial.println(incomingByte, HEX);
       // parse the information
       if(BT_state == 1) { // when transmiting data
@@ -725,7 +748,7 @@ void BTHandler() {
         uint8_t msg_note = (incomingByte & 0x3f);
         if(msg_type != 0b10) {
           if(MIDI_events_write_idx < MAX_MIDI_EVENTS -1){
-            MIDI_events[MIDI_events_write_idx++].data = incomingByte;  
+            MIDI_events[MIDI_events_write_idx++] = incomingByte;  
           }
         }
       }
@@ -735,53 +758,41 @@ void BTHandler() {
 
 
 void loop() {
-  piezo_loop(input_pins);
-//  lcd.print("hello, world!");
-//  tft.setRotation(4);
-//  testText();
-  // Background process
-  if(!pause_clk_flag){
-    CLK_GEN();
+  // when first run the loop, beep 3 times to indicate it's successfully initialized
+  if(!ran_once_flag) {
+    ran_once_flag = true;
+    for (int i = 0; i < 3; i++)
+    {
+      analogWrite(METRONOME, metronome_volume);
+      delay(30);
+      analogWrite(METRONOME, 0);
+      delay(300);
+    }
   }
-  
+
+
   // when Bluetooth Data comes in
   if(BLEmini.available() > 0) {
     incomingByte = BLEmini.read();
-//    Serial.println( incomingByte, HEX );
-    BTHandler();
+    bt_msg_handler();
   }
-  
-  if(SYS_state == 2){
-    play_next_MIDI_event();  
-  }
-  
-}
-unsigned long testText() {
-  tft.fillScreen(BLACK);
-  unsigned long start = micros();
-  tft.setCursor(0, 0);
-  tft.setTextColor(WHITE);  tft.setTextSize(1);
-  tft.println("Piano Hero");
-  
-  return micros() - start;
-}
 
+  // SYS_state state-specific cases
+  switch (SYS_state) {
+    case 0: // normal/initial state
 
-//void loop() {
-////  if(!clear_bit_shifter) {
-////    digitalWrite(SLOW_SRCLR,HIGH);
-////    digitalWrite(FAST_SRCLR,HIGH);
-////    clear_bit_shifter = true;
-////  } 
-//  
-////  char data[] = "00000111";
-////  LED_array_clk_gen(1,data,LED_DATA1);
-//
-//  // when Bluetooth Data comes in
-//  if(Serial1.available() > 0) {
-//    Serial.write( Serial1.read() );
-//    
-//  }
-//
-//  
-//}
+      break;
+    case 1:  // music loading state
+
+      break;
+    case 2: // Playing Back state 
+      if(!pause_clk_flag){
+        CLK_GEN();
+      }
+      play_next_MIDI_event();
+      piezo_loop(input_pins);
+      break;
+    default:
+      break;
+  }  
+}
