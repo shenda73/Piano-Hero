@@ -5,10 +5,10 @@
  */
  
 /*
- * 
  * AtMega2560 Datasheet
  * http://www.atmel.com/images/atmel-2549-8-bit-avr-microcontroller-atmega640-1280-1281-2560-2561_datasheet.pdf
  * https://arduino-info.wikispaces.com/MegaQuickRef
+ * 
  */
 
 #include <PinChangeInt.h>
@@ -49,7 +49,7 @@ static bool ran_once_flag = false;
 #define FUNC_TEMP_ADJUST_UP 0x91
 #define FUNC_TEMP_ADJUST_DOWN 0x90
 
-// Other
+// internal use
 #define END_OF_MIDI_STREAM 0x8B
 
 // Time Markers
@@ -640,7 +640,11 @@ void bt_msg_handler() {
       BT_state = 0;
       BLEmini.write(RESP_ACKNOWLEDGE);
 #if DEBUG_MODE
-      count++;
+      if (SYS_state == 1)
+      {
+        count++;
+      }
+      
 #endif
       break;
 
@@ -741,17 +745,20 @@ void bt_msg_handler() {
       BLEmini.write(RESP_ACKNOWLEDGE);
       break;
     default:  // General Data Bytes
-//      Serial.println(incomingByte, HEX);
-      // parse the information
-      if(BT_state == 1) { // when transmiting data
-        uint8_t msg_type = ((incomingByte >> 6)&0x3);
-        uint8_t msg_note = (incomingByte & 0x3f);
-        if(msg_type != 0b10) {
-          if(MIDI_events_write_idx < MAX_MIDI_EVENTS -1){
-            MIDI_events[MIDI_events_write_idx++] = incomingByte;  
+      // if the message's header is either note on or note off
+      if ((incomingByte >> 6) == 0b01 || (incomingByte >> 6) == 0b11)
+      {
+        if(BT_state == 1) { // when transmiting data
+          uint8_t msg_type = ((incomingByte >> 6)&0x3);
+          uint8_t msg_note = (incomingByte & 0x3f);
+          if(msg_type != 0b10) {
+            if(MIDI_events_write_idx < MAX_MIDI_EVENTS -1){
+              MIDI_events[MIDI_events_write_idx++] = incomingByte;  
+            }
           }
         }
       }
+      
     break;
   }
 }
@@ -769,7 +776,6 @@ void loop() {
       delay(300);
     }
   }
-
 
   // when Bluetooth Data comes in
   if(BLEmini.available() > 0) {
@@ -790,7 +796,7 @@ void loop() {
         CLK_GEN();
       }
       play_next_MIDI_event();
-      piezo_loop(input_pins);
+//      piezo_loop(input_pins);
       break;
     default:
       break;

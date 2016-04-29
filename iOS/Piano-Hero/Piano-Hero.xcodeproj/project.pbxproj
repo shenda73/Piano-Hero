@@ -17,7 +17,8 @@
 		92A82C941CC03FFD0080AFC3 /* Piano_HeroTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C931CC03FFD0080AFC3 /* Piano_HeroTests.swift */; };
 		92A82C9F1CC03FFD0080AFC3 /* Piano_HeroUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C9E1CC03FFD0080AFC3 /* Piano_HeroUITests.swift */; };
 		92A82CB11CC0480F0080AFC3 /* BLE-Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82CB01CC0480F0080AFC3 /* BLE-Swift.swift */; };
-		92A82CB31CC9A7750080AFC3 /* MIDIParse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82CB21CC9A7750080AFC3 /* MIDIParse.swift */; };
+		92C5FB4B1CD14F7C00D1A356 /* ControlPanelViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C5FB4A1CD14F7C00D1A356 /* ControlPanelViewController.swift */; };
+		92C5FB4D1CD1539200D1A356 /* ControlCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C5FB4C1CD1539200D1A356 /* ControlCenter.swift */; };
 		92C60F541CCD5CBA00FE9F40 /* measures_2_4.midi in Resources */ = {isa = PBXBuildFile; fileRef = 92C60F531CCD5CBA00FE9F40 /* measures_2_4.midi */; };
 /* End PBXBuildFile section */
 
@@ -55,7 +56,8 @@
 		92A82C9E1CC03FFD0080AFC3 /* Piano_HeroUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Piano_HeroUITests.swift; sourceTree = "<group>"; };
 		92A82CA01CC03FFD0080AFC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92A82CB01CC0480F0080AFC3 /* BLE-Swift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "BLE-Swift.swift"; path = "BLE/BLE-Swift.swift"; sourceTree = "<group>"; };
-		92A82CB21CC9A7750080AFC3 /* MIDIParse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIParse.swift; sourceTree = "<group>"; };
+		92C5FB4A1CD14F7C00D1A356 /* ControlPanelViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlPanelViewController.swift; sourceTree = "<group>"; };
+		92C5FB4C1CD1539200D1A356 /* ControlCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlCenter.swift; sourceTree = "<group>"; };
 		92C60F531CCD5CBA00FE9F40 /* measures_2_4.midi */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = measures_2_4.midi; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -110,7 +112,6 @@
 				92A82C7B1CC03FFD0080AFC3 /* AppDelegate.swift */,
 				92A82CB01CC0480F0080AFC3 /* BLE-Swift.swift */,
 				92A82C7D1CC03FFD0080AFC3 /* ViewController.swift */,
-				92A82CB21CC9A7750080AFC3 /* MIDIParse.swift */,
 				92C60F531CCD5CBA00FE9F40 /* measures_2_4.midi */,
 				92A82C7F1CC03FFD0080AFC3 /* Main.storyboard */,
 				92A82C851CC03FFD0080AFC3 /* Assets.xcassets */,
@@ -118,6 +119,8 @@
 				92A82C8A1CC03FFD0080AFC3 /* Info.plist */,
 				929A7FA31CCC1D5D0021507F /* Undertale_-_080_Finale.mid */,
 				92A82C821CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld */,
+				92C5FB4A1CD14F7C00D1A356 /* ControlPanelViewController.swift */,
+				92C5FB4C1CD1539200D1A356 /* ControlCenter.swift */,
 			);
 			path = "Piano-Hero";
 			sourceTree = "<group>";
@@ -275,7 +278,8 @@
 			files = (
 				92A82C7E1CC03FFD0080AFC3 /* ViewController.swift in Sources */,
 				92A82C7C1CC03FFD0080AFC3 /* AppDelegate.swift in Sources */,
-				92A82CB31CC9A7750080AFC3 /* MIDIParse.swift in Sources */,
+				92C5FB4D1CD1539200D1A356 /* ControlCenter.swift in Sources */,
+				92C5FB4B1CD14F7C00D1A356 /* ControlPanelViewController.swift in Sources */,
 				92A82C841CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld in Sources */,
 				92A82CB11CC0480F0080AFC3 /* BLE-Swift.swift in Sources */,
 			);

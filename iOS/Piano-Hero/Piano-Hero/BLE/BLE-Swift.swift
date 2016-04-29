@@ -22,9 +22,9 @@ protocol BLEDelegate {
 
 class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
-    let RBL_SERVICE_UUID = "713D0000-503E-4C75-BA94-3148F18D941E"
-    let RBL_CHAR_TX_UUID = "713D0002-503E-4C75-BA94-3148F18D941E"
-    let RBL_CHAR_RX_UUID = "713D0003-503E-4C75-BA94-3148F18D941E"
+    private let RBL_SERVICE_UUID = "713D0000-503E-4C75-BA94-3148F18D941E"
+    private let RBL_CHAR_TX_UUID = "713D0002-503E-4C75-BA94-3148F18D941E"
+    private let RBL_CHAR_RX_UUID = "713D0003-503E-4C75-BA94-3148F18D941E"
     
     var delegate: BLEDelegate?
     
@@ -39,7 +39,7 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private var waitingForResponse:Bool = false
     private var byteSendingBuffer:[UInt8] = []
-    private var byteSendingWaitingList:[[UInt8]] = []
+    private var byteSendingWaitingList:[UInt8] = []
     private var resendTimer:NSTimer = NSTimer()
     private var resendTimeoutTime:Double = 2.0
     override init() {
@@ -51,7 +51,6 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     @objc private func scanTimeout() {
-        
         print("[DEBUG] Scanning stopped")
         self.centralManager.stopScan()
     }
@@ -60,7 +59,6 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     // assume there is one active peripheral
     func connectToFirstPeripheral() -> Bool{
-
         // automatically connect the first one in the BT device list
         if self.peripherals.count > 0 {
             self.connectToPeripheral(self.peripherals[0])
@@ -71,10 +69,6 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
     
-    func hasMoreThanOnePeripheral() -> Bool {
-        return self.peripherals.count > 0
-    }
-    
     func sendString(stringToSend: String) -> Bool{
         var textToSend:NSString = NSString(string: stringToSend)
         var flag:Bool = false
@@ -82,7 +76,6 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         if textToSend.length > 16 {
             tempString = textToSend.substringWithRange(NSRange(16...textToSend.length-1))
             textToSend = textToSend.substringToIndex(16)
-//            sendString(tempString)
             flag = true
         }
         let data:NSData = textToSend.dataUsingEncoding(NSUTF8StringEncoding)!
@@ -102,7 +95,8 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     // maximum 16 bytes at a time
     func sendBytes(bytesToSend: [UInt8]) -> Bool {
-        print("actually send out bytes")
+        print("[DEBUG] actually send out bytes ")
+//        print(bytesToSend)
         var data:NSData
         if bytesToSend.count == 0 {
             // ignore it
@@ -133,124 +127,86 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             return sendBytes(trimmedData)
         }
     }
-    
-    // ------ REQUESTS ------
-    
-    func startTransmissionRequest() {
-        sendBytesWaitingForResponse([0x97])   //FUNC_START_PLAYING
-    }
-    func endTransmissionRequest() {
-        sendBytesWaitingForResponse([0x98])   //FUNC_STOP_PLAYING
-    }
-    
-    func playbackRequest() {
-        print("FUNC_START_PLAYBACK")
-        sendBytesWaitingForResponse([0x9B])    //FUNC_START_PLAYBACK
-    }
-    
-    func pausePlaybackRequest() {
-        print("FUNC_END_PLAYBACK")
-        sendBytesWaitingForResponse([0x9C])     //FUNC_END_PLAYBACK
-    }
-    
-    func toggleMetronome() {
-        print("FUNC_TOGGLE_METRONOME")
-        sendBytesWaitingForResponse([0x9D])
-    }
-    
-    func metronomeVolUp() {
-        print("FUNC_METRONOME_VOL_UP")
-        sendBytesWaitingForResponse([0x9E])
-    }
 
-    func metronomeVolDown() {
-        print("FUNC_METRONOME_VOL_DOWN")
-        sendBytesWaitingForResponse([0x9F])
+    
+    // This can only take bytes of 14
+    private func wrapBytes(bytesToWrap:[UInt8]) -> [UInt8] {
+        if bytesToWrap.count <= 14 {
+            return [Constants.BTFunctionCode.FUNC_START_OF_DATA_TRANSMISSION] + bytesToWrap + [Constants.BTFunctionCode.FUNC_END_OF_DATA_TRANSMISSION]
+        } else {
+            return []
+        }
     }
     
-    
-    // ------ REQUESTS ------
-    
-    // TODO: fix race condition
-    // below 16 bytes
-    func sendBytesWaitingForResponse(dataToSend:[UInt8]) -> Bool {
-        if !waitingForResponse {
+    func sendBytesWaitingForResponse(dataToSend:[UInt8], needWrap:Bool){
+        if dataToSend.count <= 0 {
+            return
+        }
+        var dataLengthLimit = 14
+        if !needWrap {
+            dataLengthLimit = 16
+        }
+        
+        if !waitingForResponse && byteSendingWaitingList.count==0{
             self.waitingForResponse = true
-            self.byteSendingBuffer = dataToSend
-            sendBytes(dataToSend)
-            // set a time out for resending it if no response
+            if dataToSend.count <= dataLengthLimit {
+                self.byteSendingBuffer = dataToSend
+                
+            } else {
+                let bytesToSend:[UInt8] = Array(ArraySlice<UInt8>(dataToSend[0..<dataLengthLimit]))
+                let restBytes:[UInt8] = Array(ArraySlice<UInt8>(dataToSend[dataLengthLimit..<dataToSend.count]))
+                self.byteSendingBuffer.removeAll()
+                self.byteSendingBuffer = bytesToSend
+                self.byteSendingWaitingList += restBytes
+            }
+            if !needWrap {
+                sendBytes(self.byteSendingBuffer)
+            } else {
+                sendBytes(self.wrapBytes(self.byteSendingBuffer))
+            }
+            
             self.resendTimer =  NSTimer.scheduledTimerWithTimeInterval(self.resendTimeoutTime, target: self, selector: #selector(BLE.timeOutResend), userInfo: nil, repeats: false)
         } else {
-            self.byteSendingWaitingList.append(dataToSend)
-            
+            self.byteSendingWaitingList += dataToSend
         }
-        return true
     }
     
     func timeOutResend() {
         if waitingForResponse {
-            sendBytes(self.byteSendingBuffer)
-            
+            sendBytes(wrapBytes(self.byteSendingBuffer))
+//            self.resendTimer =  NSTimer.scheduledTimerWithTimeInterval(self.resendTimeoutTime, target: self, selector: #selector(BLE.timeOutResend), userInfo: nil, repeats: false)
         }
     }
     
-    func receiveByteHandler(data:[UInt8],btState:UnsafeMutablePointer<UInt8>) {
-        if btState == nil {
-            return
+    func sendTheFirst14BytesInWaitingListWithoutResendTimer() {
+        var dataToSend:[UInt8] = []
+        if self.byteSendingWaitingList.count <= 14 {
+            dataToSend += self.byteSendingWaitingList
+            self.byteSendingWaitingList.removeAll()
+        } else { // count > 14
+            dataToSend += Array(ArraySlice<UInt8>(self.byteSendingWaitingList[0..<14]))
+            let tempData = Array(ArraySlice<UInt8>(self.byteSendingWaitingList[14..<self.byteSendingWaitingList.count]))
+            self.byteSendingWaitingList.removeAll()
+            self.byteSendingWaitingList += tempData
         }
-        
-        for each in data {
-            receiveByteHandlerHelper(each, btState: btState)
-        }
-        
-        
+        self.byteSendingBuffer.removeAll()
+        self.byteSendingBuffer += dataToSend
+        self.sendBytes(self.wrapBytes(dataToSend))
     }
     
-    func receiveByteHandlerHelper(data:UInt8,btState:UnsafeMutablePointer<UInt8>) -> Bool {
-        if btState == nil {
-            return false
-        }
+    func additionalReceivedByteHandler(data:UInt8) {
         self.resendTimer.invalidate()   // stop the resend timer
-        
-        if btState.memory == 1 {
-            if data == 0xE5 {   // RESP_ACKNOWLEDGE
-                self.byteSendingBuffer.removeAll()
-                self.waitingForResponse = false
-                
-            } else if data == 0xE8 {    //RESP_END_CONNECTION
-                self.byteSendingBuffer.removeAll()
-                self.waitingForResponse = false
-                btState.memory = 0
-            }
-        } else if btState.memory == 0 {
-            if data == 0xE7 {   //RESP_START_CONNECTION
-                self.byteSendingBuffer.removeAll()
-                self.waitingForResponse = false
-                btState.memory = 1
-            }
-        }
-        
+        self.byteSendingBuffer.removeAll()
+        self.waitingForResponse = false
+
         // try the waiting list
         if self.byteSendingWaitingList.count > 0 {
-            self.waitingForResponse = true
-            self.byteSendingBuffer = self.byteSendingWaitingList[0]
-            self.byteSendingWaitingList.removeAtIndex(0)
-            sendBytes(self.byteSendingBuffer)
+            self.sendTheFirst14BytesInWaitingListWithoutResendTimer()
             self.resendTimer =  NSTimer.scheduledTimerWithTimeInterval(self.resendTimeoutTime, target: self, selector: #selector(BLE.timeOutResend), userInfo: nil, repeats: false)
-        } else {
-            // when waiting list is empty, do nothing
-            self.waitingForResponse = false
-            self.byteSendingBuffer.removeAll()
-            self.resendTimer.invalidate()
         }
-        
-        return true
     }
     
-    // function for racing condition
-    // reference: 
-    //
-    
+
     
     // MARK: Public methods
     func startScanning(timeout: Double) -> Bool {
