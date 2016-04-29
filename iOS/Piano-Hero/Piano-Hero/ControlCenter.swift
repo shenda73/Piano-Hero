@@ -144,7 +144,7 @@ class ControlCenter: BLEDelegate{
         print("BLE did disconnect from peripheral")
     }
     func bleDidReceiveData(data: NSData?){
-        print("BLE did receive data")
+//        print("BLE did receive data")
         self.BTHandler(data)
     }
 }
@@ -197,6 +197,7 @@ class MIDIRaw {
         let newNotes:[MIDINote] = parseMIDIEventTracks(musicSequence)
         let tempMIDIData:MIDINotes = MIDINotes(speed: speed)
         tempMIDIData.addNotes(newNotes)
+//        tempMIDIData.inspectElementsInDataOut(tempMIDIData.generateDataOut())
         return tempMIDIData.generateDataOut()
     }
     
@@ -308,6 +309,7 @@ class MIDIRaw {
 //            [Constants.BTFunctionCode.FUNC_START_OF_DATA_TRANSMISSION]   //FUNC_START_OF_DATA_TRANSMISSION
         
         // append two time stamps
+        print("parsed time diff: " +  String(timeDiff))
         retArray.append(timeDiffB1)
         retArray.append(timeDiffB2)
         
@@ -326,10 +328,13 @@ class MIDIRaw {
             print("warning! writing more than 16 bytes")
         }
         
-        print(retArray)
+        if retArray.count != 2 {
+            print(retArray)
+            
+            // replace this with a timed sending
+            BTPort.sendBytesWaitingForResponse(retArray,needWrap: true)
+        }
         
-        // replace this with a timed sending
-        BTPort.sendBytesWaitingForResponse(retArray,needWrap: true)
     }
     
 }

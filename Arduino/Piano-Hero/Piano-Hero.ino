@@ -495,18 +495,12 @@ enum MIDIEventType {
 
 
 uint8_t note_type(MIDIEvent e) {
-  return (e >> 6) & 0b11;
+  return (e & 0b11000000) >> 6;
 }
 uint8_t note_content(MIDIEvent e) {
   return e & 0x3F;
 }
 
-// MIDIEventType note_type(MIDIEvent e) {
-//   return (e >> 6) & 0b11;
-// }
-// MIDIEventType note_content(MIDIEvent e) {
-//   return e & 0x3F;
-// }
 
 void play_next_MIDI_event() {
   if(MIDI_events[MIDI_events_write_idx] == END_OF_MIDI_STREAM) {
@@ -526,8 +520,8 @@ void play_next_MIDI_event() {
       uint16_t p2 = note_content(MIDI_events[MIDI_events_write_idx+1]);
       curEventInterval_MIDI = ((p1 << 6) | p2)/tempo_factor;
 #if DEBUG_MODE
-      Serial.print(curEventInterval_MIDI);
-      Serial.print(" ");
+//      Serial.print(curEventInterval_MIDI);
+//      Serial.print(" ");
 #endif
       time_read_state = 1;
       // skip the second time byte
@@ -538,8 +532,8 @@ void play_next_MIDI_event() {
     // when not finishing read the notes
     while(time_read_state == 1) {
 #if DEBUG_MODE
-      Serial.print(note_content(MIDI_events[MIDI_events_write_idx]),DEC);
-      Serial.print(" ");
+//      Serial.print(note_content(MIDI_events[MIDI_events_write_idx]),DEC);
+//      Serial.print(" ");
 #endif
       if (note_type(MIDI_events[MIDI_events_write_idx]) == MIDI_NOTE_ON_EVENT) { // on
         turn_on_note_num(note_content(MIDI_events[MIDI_events_write_idx]));
@@ -552,7 +546,7 @@ void play_next_MIDI_event() {
       if(note_type(MIDI_events[MIDI_events_write_idx]) == MIDI_TIME_EVENT){
         time_read_state = 0;
 #if DEBUG_MODE
-         Serial.println(" ");
+//         Serial.println(" ");
 #endif
       } 
       // when run into the end of file
@@ -745,8 +739,8 @@ void bt_msg_handler() {
       BLEmini.write(RESP_ACKNOWLEDGE);
       break;
     default:  // General Data Bytes
-      // if the message's header is either note on or note off
-      if ((incomingByte >> 6) == 0b01 || (incomingByte >> 6) == 0b11)
+      // if the message's header is either note on or note off or time
+      if ((incomingByte >> 6) == 0b01 || (incomingByte >> 6) == 0b11 || (incomingByte >> 6) == 0b00)
       {
         if(BT_state == 1) { // when transmiting data
           uint8_t msg_type = ((incomingByte >> 6)&0x3);

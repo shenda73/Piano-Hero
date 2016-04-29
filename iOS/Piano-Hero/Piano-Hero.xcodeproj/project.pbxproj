@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		929A7FA41CCC1D5D0021507F /* Undertale_-_080_Finale.mid in Resources */ = {isa = PBXBuildFile; fileRef = 929A7FA31CCC1D5D0021507F /* Undertale_-_080_Finale.mid */; };
 		92A82C7C1CC03FFD0080AFC3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C7B1CC03FFD0080AFC3 /* AppDelegate.swift */; };
-		92A82C7E1CC03FFD0080AFC3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C7D1CC03FFD0080AFC3 /* ViewController.swift */; };
 		92A82C811CC03FFD0080AFC3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 92A82C7F1CC03FFD0080AFC3 /* Main.storyboard */; };
 		92A82C841CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 92A82C821CC03FFD0080AFC3 /* Piano_Hero.xcdatamodeld */; };
 		92A82C861CC03FFD0080AFC3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 92A82C851CC03FFD0080AFC3 /* Assets.xcassets */; };
@@ -43,7 +42,6 @@
 		929A7FA31CCC1D5D0021507F /* Undertale_-_080_Finale.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = "Undertale_-_080_Finale.mid"; sourceTree = "<group>"; };
 		92A82C781CC03FFD0080AFC3 /* Piano-Hero.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Piano-Hero.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		92A82C7B1CC03FFD0080AFC3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		92A82C7D1CC03FFD0080AFC3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		92A82C801CC03FFD0080AFC3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		92A82C831CC03FFD0080AFC3 /* Piano_Hero.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Piano_Hero.xcdatamodel; sourceTree = "<group>"; };
 		92A82C851CC03FFD0080AFC3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -111,7 +109,6 @@
 			children = (
 				92A82C7B1CC03FFD0080AFC3 /* AppDelegate.swift */,
 				92A82CB01CC0480F0080AFC3 /* BLE-Swift.swift */,
-				92A82C7D1CC03FFD0080AFC3 /* ViewController.swift */,
 				92C60F531CCD5CBA00FE9F40 /* measures_2_4.midi */,
 				92A82C7F1CC03FFD0080AFC3 /* Main.storyboard */,
 				92A82C851CC03FFD0080AFC3 /* Assets.xcassets */,
@@ -276,7 +273,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				92A82C7E1CC03FFD0080AFC3 /* ViewController.swift in Sources */,
 				92A82C7C1CC03FFD0080AFC3 /* AppDelegate.swift in Sources */,
 				92C5FB4D1CD1539200D1A356 /* ControlCenter.swift in Sources */,
 				92C5FB4B1CD14F7C00D1A356 /* ControlPanelViewController.swift in Sources */,

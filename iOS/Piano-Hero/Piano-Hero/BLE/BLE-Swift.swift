@@ -95,8 +95,6 @@ class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     // maximum 16 bytes at a time
     func sendBytes(bytesToSend: [UInt8]) -> Bool {
-        print("[DEBUG] actually send out bytes ")
-//        print(bytesToSend)
         var data:NSData
         if bytesToSend.count == 0 {
             // ignore it
